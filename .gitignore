@@ -1,0 +1,4 @@
+*.pyc
+*-checkpoint.py
+*-checkpoint.ipynb
+*-checkpoint.md
