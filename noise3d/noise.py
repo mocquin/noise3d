@@ -13,27 +13,27 @@ DTYPE = np.float64
 DDOF = 1
 
 ## classic approach
-def var_s(seq): return np.var(n_s(seq), dtype=DTYPE,  ddof=DDOF)
-def var_nt(seq): return np.var(n_t(seq), dtype=DTYPE,  ddof=DDOF)
-def var_nv(seq): return np.var(n_v(seq), dtype=DTYPE,  ddof=DDOF)
-def var_nh(seq): return np.var(n_h(seq), dtype=DTYPE,  ddof=DDOF)
-def var_ntv(seq): return np.var(n_tv(seq), dtype=DTYPE,  ddof=DDOF)
-def var_nth(seq): return np.var(n_th(seq), dtype=DTYPE,  ddof=DDOF)
-def var_nvh(seq): return np.var(n_vh(seq), dtype=DTYPE,  ddof=DDOF)
-def var_ntvh(seq): return np.var(n_tvh(seq), dtype=DTYPE,  ddof=DDOF)
+def var_s(seq, ddof=DDOF): return np.var(n_s(seq), dtype=DTYPE,  ddof=ddof)
+def var_nt(seq, ddof=DDOF): return np.var(n_t(seq), dtype=DTYPE,  ddof=ddof)
+def var_nv(seq, ddof=DDOF): return np.var(n_v(seq), dtype=DTYPE,  ddof=ddof)
+def var_nh(seq, ddof=DDOF): return np.var(n_h(seq), dtype=DTYPE,  ddof=ddof)
+def var_ntv(seq, ddof=DDOF): return np.var(n_tv(seq), dtype=DTYPE,  ddof=ddof)
+def var_nth(seq, ddof=DDOF): return np.var(n_th(seq), dtype=DTYPE,  ddof=ddof)
+def var_nvh(seq, ddof=DDOF): return np.var(n_vh(seq), dtype=DTYPE,  ddof=ddof)
+def var_ntvh(seq, ddof=DDOF): return np.var(n_tvh(seq), dtype=DTYPE,  ddof=ddof)
 
 def get_all_3D_noise_var(seq):
     return (var_nt(seq), var_nv(seq), var_nh(seq), var_ntv(seq), var_nth(seq), var_nvh(seq), var_ntvh(seq)), np.var(seq, dtype=DTYPE, ddof=DDOF)
 
 
 ## matrix approach
-def var_dt(seq): return np.var(n_dt(seq), dtype=DTYPE,  ddof=DDOF)
-def var_dv(seq): return np.var(n_dv(seq), dtype=DTYPE,  ddof=DDOF)
-def var_dh(seq): return np.var(n_dh(seq), dtype=DTYPE,  ddof=DDOF)
-def var_dtdv(seq): return np.var(n_dtdv(seq), dtype=DTYPE,  ddof=DDOF)
-def var_dtdh(seq): return np.var(n_dtdh(seq), dtype=DTYPE,  ddof=DDOF)
-def var_dvdh(seq): return np.var(n_dvdh(seq), dtype=DTYPE,  ddof=DDOF)
-def var_tot(seq): return np.var(seq, dtype=DTYPE,  ddof=DDOF)
+def var_dt(seq, ddof=DDOF): return np.var(n_dt(seq), dtype=DTYPE,  ddof=ddof)
+def var_dv(seq, ddof=DDOF): return np.var(n_dv(seq), dtype=DTYPE,  ddof=ddof)
+def var_dh(seq, ddof=DDOF): return np.var(n_dh(seq), dtype=DTYPE,  ddof=ddof)
+def var_dtdv(seq, ddof=DDOF): return np.var(n_dtdv(seq), dtype=DTYPE,  ddof=ddof)
+def var_dtdh(seq, ddof=DDOF): return np.var(n_dtdh(seq), dtype=DTYPE,  ddof=ddof)
+def var_dvdh(seq, ddof=DDOF): return np.var(n_dvdh(seq), dtype=DTYPE,  ddof=ddof)
+def var_tot(seq, ddof=DDOF): return np.var(seq, dtype=DTYPE,  ddof=ddof)
 
 def get_all_3d_mean_var(seq):
     return var_dvdh(seq), var_dtdh(seq), var_dtdv(seq), var_dh(seq), var_dv(seq), var_dt(seq), var_tot(seq)
