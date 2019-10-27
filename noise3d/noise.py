@@ -106,7 +106,6 @@ def compute_M_corrected(T, V, H):
 def _get_all_3d_variance_from_matrix(seq, M):
     vec_var_D = np.array(get_all_3d_mean_var(seq))
     
-    T, V, H = seq.shape
     M_inv = np.linalg.inv(M)
     
     vec_var_sigma = np.matmul(M_inv, vec_var_D)
