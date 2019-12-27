@@ -1,5 +1,7 @@
 import numpy as np
 
+MUS = (0, 0, 0, 0, 0, 0, 0)
+
 
 def genseq_t(T, V, H, mu, sigma):
     val = np.random.normal(mu, sigma, T)
@@ -40,7 +42,7 @@ def genseq_tvh(T, V, H, mu, sigma):
     return arr
 
 
-def genseq_all_seq(T, V, H, sigmas, mus=(0, 0, 0, 0, 0, 0, 0)):
+def genseq_all_seq(T, V, H, sigmas, mus=MUS):
     
     sigma_t, sigma_v, sigma_h, sigma_tv, sigma_th, sigma_vh, sigma_tvh = sigmas
     mu_t, mu_v, mu_h, mu_tv, mu_th, mu_vh, mu_tvh = mus
@@ -57,5 +59,5 @@ def genseq_all_seq(T, V, H, sigmas, mus=(0, 0, 0, 0, 0, 0, 0)):
     return arr_t, arr_v, arr_h, arr_tv, arr_th, arr_vh, arr_tvh, arr_tot
     
 
-def genseq_3dnoise_seq(T, V, H, sigmas, mus=(0, 0, 0, 0, 0, 0, 0)):
+def genseq_3dnoise_seq(T, V, H, sigmas, mus=MUS):
     return genseq_all_seq(T, V, H, sigmas, mus)[-1]
