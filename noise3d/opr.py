@@ -37,11 +37,11 @@ def get_all_3D_mean_seq(seq):
 
 
 #### Pour calculer les séquences de bruits
-def get_all_3d_noise_seq_fast(seq):
+def get_all_3d_noise_seq_fast(seq3d):
     # 7 images de base
-    seq_dt = dt(seq)
-    seq_dv = dv(seq)
-    seq_dh = dh(seq)
+    seq_dt = dt(seq3d)
+    seq_dv = dv(seq3d)
+    seq_dh = dh(seq3d)
     seq_dtdv = dv(seq_dt)
     seq_dtdh = dh(seq_dt)
     seq_dvdh = dv(seq_dh)
@@ -53,14 +53,13 @@ def get_all_3d_noise_seq_fast(seq):
     seq_t = seq_dvdh - seq_dtdvdh
     seq_v = seq_dtdh - seq_dtdvdh
     seq_h = seq_dtdv - seq_dtdvdh
-    seq_tv = seq_dh - seq_t - seq_dtdvdh 
-    seq_th = seq_dv - seq_t - seq_dtdvdh
-    seq_vh = seq_dt - seq_v - seq_dtdvdh
-    seq_tvh = imgSeq - (seq_t + seq_v + seq_h + seq_tv + seq_th + seq_vh)
+    seq_tv = seq_dh - seq_dtdh - seq_dvdh + seq_dtdvdh 
+    seq_th = seq_dv - seq_dtdv - seq_dvdh + seq_dtdvdh
+    seq_vh = seq_dt - seq_dtdv - seq_dtdh + seq_dtdvdh
+    seq_tvh = seq3d - (seq_t + seq_v + seq_h + seq_tv + seq_th + seq_vh)
     
-    vec_seq = seq_s, seq_t, seq_v, seq_h, seq_tv, seq_th, seq_vh, seq_tvh
-    
-    return vec_seq
+    return seq_t, seq_v, seq_h, seq_tv, seq_th, seq_vh, seq_tvh, seq3d
+
 
 
    
