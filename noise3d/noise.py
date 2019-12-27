@@ -110,8 +110,9 @@ def _get_all_3d_variance_from_matrix(seq, M):
     
     M_inv = np.linalg.inv(M)
     
-    vec_var_sigma = np.matmul(M_inv, vec_var_D)
-    return tuple(vec_var_sigma), sum(vec_var_sigma)
+    vec_var_sigma = tuple(np.matmul(M_inv, vec_var_D))
+
+    return vec_var_sigma + (sum(vec_var_sigma),)
     
 
 # With classic matrix
