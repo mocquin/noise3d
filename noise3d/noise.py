@@ -75,30 +75,32 @@ M_classic = np.array([
 ])
 
 
-def compute_M_UBO(T, V, H):
+def compute_M_UBO(T, V, H, VH):
+    # if not mask is used, VH should be equal to V*H
     mat = np.array([
-    [ 1,  0,  0,             1/V,             1/H,              0,                                  1/(V*H)],
+    [ 1,  0,  0,             1/V,             1/H,              0,                                  1/(VH)],
     [ 0,  1,  0,             1/T,               0,             1/H,                                 1/(T*H)],
     [ 0,  0,  1,               0,             1/T,             1/V,                                 1/(T*V)],
-    [ 1,  1,  0, (V+T+T*V)/(T*V),             1/H,             1/H,                   (T + V + T*V)/(T*V*H)],
-    [ 1,  0,  1,             1/V, (H+T+T*H)/(T*H),             1/V,                       (H+T+H*T)/(T*V*H)],
-    [ 0,  1,  1,             1/T,             1/T, (H+V+H*V)/(V*H),                       (H+V+H*V)/(T*V*H)],
-    [ 1,  1,  1, (V+T+T*V)/(T*V), (H+T+T*H)/(T*H), (H+V+H*V)/(V*H), (H+T+V+T*V + H*T + V*H + T*V*H)/(T*V*H)]
+    [ 1,  1,  0, (V+T+T*V)/(T*V),             1/H,             1/H,                   (T + V + T*V)/(T*VH)],
+    [ 1,  0,  1,             1/V, (H+T+T*H)/(T*H),             1/V,                       (H+T+H*T)/(T*VH)],
+    [ 0,  1,  1,             1/T,             1/T, (H+V+H*V)/(VH),                       (H+V+H*V)/(T*VH)],
+    [ 1,  1,  1, (V+T+T*V)/(T*V), (H+T+T*H)/(T*H), (H+V+H*V)/(VH), (H+T+V+ T*V + H*T + VH + T*VH)/(T*VH)]
     ])
 
     return mat
 
 
-def compute_M_corrected(T, V, H):
+def compute_M_corrected(T, V, H, VH):
+    # if not mask is used, VH should be equal to V*H
     mat = np.array([
-    [                   1,                   0,                   0,                  1/V,                 1/H,                    0,  1/(V*H)],
-    [                   0,                   1,                   0,                  1/T,                   0,                  1/H,  1/(T*H)],
-    [                   0,                   0,                   1,                    0,                 1/T,                  1/V,  1/(T*V)],
-    [     V*(T-1)/(T*V-1),     T*(V-1)/(T*V-1),                   0,                    1, V*(T-1)/((T*V-1)*H),  T*(V-1)/((T*V-1)*H),      1/H],
-    [     H*(T-1)/(T*H-1),                   0,     T*(H-1)/(T*H-1),  H*(T-1)/((T*H-1)*V),                   1,  T*(H-1)/((T*H-1)*V),      1/V],
-    [                   0,     H*(V-1)/(V*H-1),     V*(H-1)/(V*H-1),  H*(V-1)/((V*H-1)*T), V*(H-1)/((V*H-1)*T),                    1,      1/T],
-    [ V*H*(T-1)/(T*V*H-1), T*H*(V-1)/(T*V*H-1), T*V*(H-1)/(T*V*H-1),  H*(T*V-1)/(T*V*H-1), V*(T*H-1)/(T*V*H-1),  T*(V*H-1)/(T*V*H-1),        1],
-    ])
+    [                1,                   0,                  0,                 1/V,                 1/H,                   0,  1/(VH)],
+    [                0,                   1,                  0,                 1/T,                   0,                 1/H, 1/(T*H)],
+    [                0,                   0,                  1,                   0,                 1/T,                 1/V, 1/(T*V)],
+    [  V*(T-1)/(T*V-1),     T*(V-1)/(T*V-1),                  0,                   1, V*(T-1)/((T*V-1)*H), T*(V-1)/((T*V-1)*H),     1/H],
+    [  H*(T-1)/(T*H-1),                   0,    T*(H-1)/(T*H-1), H*(T-1)/((T*H-1)*V),                   1, T*(H-1)/((T*H-1)*V),     1/V],
+    [                0,      H*(V-1)/(VH-1),     V*(H-1)/(VH-1),  H*(V-1)/((VH-1)*T),  V*(H-1)/((VH-1)*T),                   1,     1/T],
+    [VH*(T-1)/(T*VH-1),  T*H*(V-1)/(T*VH-1), T*V*(H-1)/(T*VH-1),  H*(T*V-1)/(T*VH-1),  V*(T*H-1)/(T*VH-1),   T*(VH-1)/(T*VH-1),       1],
+    ], dtype=float)
     return mat
 
 
@@ -116,16 +118,30 @@ def _get_all_3d_variance_from_matrix(seq, M):
 def get_all_3d_classic_var_matrix(seq):
     return _get_all_3d_variance_from_matrix(seq, M_classic)
 
+def get_valid_counts(seq):
+    # shapes
+    Ts, Vs, Hs = seq.shape 
+    # valid counts
+    #Tv, Vv, Hv = (np.ma.count(seq, axis=0), np.ma.count(seq, axis=1), np.ma.count(seq, axis=2))
+    #print(Tv.shape)
+    #print(Vv.shape)
+    #print(Hv.shape)
+    # valid counts in 2D plane
+    # if not mask is used, VH should be equal to V*H
+    VHv = np.ma.count(seq[0]) # count the valid values on first image
+    return Ts, Vs, Hs, VHv
+    
+
 # With UBO
 def get_all_3d_UBO_var_matrix(seq):
-    T, V, H = seq.shape
-    M_UBO = compute_M_UBO(T, V, H)
+    Tv, Vv, Hv, VHv = get_valid_counts(seq)    
+    M_UBO = compute_M_UBO(Tv, Vv, Hv, VHv)
     return _get_all_3d_variance_from_matrix(seq, M_UBO)
 
 # With corrected matrix
 def get_all_3d_corrected_var_matrix(seq):
-    T, V, H = seq.shape
-    M_corrected = compute_M_corrected(T, V, H)
+    Tv, Vv, Hv, VHv = get_valid_counts(seq)
+    M_corrected = compute_M_corrected(Tv, Vv, Hv, VHv)
     return _get_all_3d_variance_from_matrix(seq, M_corrected)
 
 
