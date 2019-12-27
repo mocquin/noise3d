@@ -21,7 +21,7 @@ def n_vh(seq): return dt(idv(idh(seq)))
 def n_tvh(seq): return idh(idv(idt(seq)))
 
 def get_all_3d_noise_seq(seq):
-    return n_s(seq), n_t(seq), n_v(seq), n_h(seq), n_tv(seq), n_th(seq), n_vh(seq), n_tvh(seq)
+    return n_t(seq), n_v(seq), n_h(seq), n_tv(seq), n_th(seq), n_vh(seq), n_tvh(seq), seq
 
 ## matrix approach
 def n_dt(seq): return dt(seq)
