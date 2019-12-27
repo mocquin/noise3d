@@ -6,5 +6,7 @@
 
 - plot les distributions pour vérifier qu'elles sont bien normales
 
+- etude mesures de bruit NETD et BSFR par méthodes classiques
+
 - Comprendre les différences avec les calculs de NETD sur séquence (moyenne des écarts-type OU écart type total OU tvh)
 - Comprendre pourquoi en générant une séquence tvh, la NETD n'est pas égale à la variance totale (y'a un peu de bruit qui est "éffacé" dans l'opération de moyennage...!)
