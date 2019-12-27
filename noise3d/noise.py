@@ -23,7 +23,7 @@ def var_nvh(seq, ddof=DDOF): return np.var(n_vh(seq), dtype=DTYPE,  ddof=ddof)
 def var_ntvh(seq, ddof=DDOF): return np.var(n_tvh(seq), dtype=DTYPE,  ddof=ddof)
 
 def get_all_3D_noise_var(seq):
-    return (var_nt(seq), var_nv(seq), var_nh(seq), var_ntv(seq), var_nth(seq), var_nvh(seq), var_ntvh(seq)), np.var(seq, dtype=DTYPE, ddof=DDOF)
+    return var_nt(seq), var_nv(seq), var_nh(seq), var_ntv(seq), var_nth(seq), var_nvh(seq), var_ntvh(seq), np.var(seq, dtype=DTYPE, ddof=DDOF)
 
 
 ## matrix approach
@@ -59,7 +59,7 @@ def get_all_3d_noise_var_fast(seq, ddof=DDOF):
     tot = np.var(seq, dtype=DTYPE, ddof=ddof)
     var_ntvh = tot - (var_nt + var_nv + var_nh + var_ntv + var_nth + var_nvh)
     
-    return (var_nt, var_nv, var_nh, var_ntv, var_nth, var_nvh, var_ntvh), tot
+    return var_nt, var_nv, var_nh, var_ntv, var_nth, var_nvh, var_ntvh, tot
     
 
 
