@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from . import noise
 from . import opr
+from . import spectrum as ns
 
 import scipy.stats as st
 
@@ -240,10 +241,75 @@ def noise_resume(seq, pc=False, method="fast"):
     #print('$\sigma^2_t$ : {:8.3f} | $\sigma^2_tv$ : {:6.3f} | $\sigma^2_th$ : {:6.3f} | $\sigma^2_tvh$ : {:6.3f} '.format(st, stv, sth, stvh))
     #print("-------------------------------------------------")
 
+    
+### Display spectrum
+def disp_spectrum(seq, xt=0, xv=0, xh=0, figsize=(4,2), share_scale=True):
 
+    vec_psds = ns.compute_psd(seq)
+    t, v, h, tv, th, vh, tvh = vec_psds
     
+    vmin_vec = np.min(vec_psds)
+    vmax_vec = np.max(vec_psds)
+
+    # Spectres 1D
+    psd_t_1D = t[:, xv, xh]
+    psd_v_1D = v[xt, :, xh]
+    psd_h_1D = h[xt, xv, :]
+    # Spectres 2D 
+    psd_tv_2D = tv[:, :, xh]
+    psd_th_2D = th[:, xv, :]
+    psd_vh_2D = vh[xt, :, :]
+    # Spectre 3D
+    psd_tvh_3D = tvh
+
+    fig, axes = plt.subplots(3, 3, figsize=figsize)
+    axes = axes.ravel().tolist()
+    # 1D spectrum
+    axes[0].plot(psd_t_1D)
+    axes[0].set_xlabel("t")
+    axes[1].plot(psd_v_1D)
+    axes[1].set_xlabel("v")
+    axes[2].plot(psd_h_1D)
+    axes[2].set_xlabel("h")
     
+    if share_scale:
+        axes[0].set_ylim((vmin_vec, vmax_vec))
+        axes[1].set_ylim((vmin_vec, vmax_vec))
+        axes[2].set_ylim((vmin_vec, vmax_vec))
     
+    # 2D spectrum
+    if share_scale:
+        axes[3].imshow(psd_tv_2D, vmin=vmin_vec, vmax=vmax_vec)
+        axes[4].imshow(psd_th_2D, vmin=vmin_vec, vmax=vmax_vec)
+        axes[5].imshow(psd_vh_2D, vmin=vmin_vec, vmax=vmax_vec)
+    else:
+        axes[3].imshow(psd_tv_2D)
+        axes[4].imshow(psd_th_2D)
+        axes[5].imshow(psd_vh_2D)
+
+    axes[3].set_xlabel("t")
+    axes[3].set_ylabel("v")
+    axes[4].set_xlabel("t")
+    axes[4].set_ylabel("h")
+    axes[5].set_xlabel("v")
+    axes[5].set_ylabel("h")
+    
+    if share_scale:
+        axes[6].imshow(psd_tvh_3D[xt, :, :], vmin=vmin_vec, vmax=vmax_vec)
+        axes[7].imshow(psd_tvh_3D[:, xv, :], vmin=vmin_vec, vmax=vmax_vec)
+        im = axes[8].imshow(psd_tvh_3D[:, :, xh], vmin=vmin_vec, vmax=vmax_vec)
+        fig.colorbar(im, ax=axes)
+    else:
+        axes[6].imshow(psd_tvh_3D[xt, :, :])#, vmin=vmin, vmax=vmax)
+        axes[7].imshow(psd_tvh_3D[:, xv, :])#, vmin=vmin, vmax=vmax)
+        im = axes[8].imshow(psd_tvh_3D[:, :, xh])#, vmin=vmin, vmax=vmax)
+        plt.tight_layout()
+        fig.colorbar(im, ax=axes)
+
+    return fig, axes
+
+
+
 
 ### Display images
 def remove_keymap_conflicts(new_keys_set):
@@ -295,4 +361,5 @@ def next_slice(ax):
     ax.set_title(ax.seq_name + "[{}]".format(ax.index))
 
     
-
+def display_spectrums():
+    pass

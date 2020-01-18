@@ -4,7 +4,3 @@ def read_mask():
 def read_seq():
     pass
 
-def apply_2D_mask():
-    pass
-
-de

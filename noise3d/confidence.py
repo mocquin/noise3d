@@ -3,14 +3,15 @@ import scipy.stats
 from .noise import compute_M_corrected
 
 def dof_of_sigmaDs(T, V, H):
+    d=0
     arr = np.array(
         [
-            [T, 0, 0, T   , T  , 0  ,  T],
-            [0, V, 0, V   , 0  , V  ,  V],
-            [0, 0, H, 0   , H  , H  ,  H],
-            [T, V, 0, T*V , T  , V  ,  T*V],
-            [T, 0, H, T   , T*H, H  ,  T*H],
-            [0, V, H, V   , H  , V*H,  V*H],
+            [T, 0+d, 0+d, T   , T  , 0+d  ,  T],
+            [0+d, V, 0+d, V   , 0+d  , V  ,  V],
+            [0+d, 0+d, H, 0+d   , H  , H  ,  H],
+            [T, V, 0+d, T*V , T  , V  ,  T*V],
+            [T, 0+d, H, T   , T*H, H  ,  T*H],
+            [0+d, V, H, V   , H  , V*H,  V*H],
             [T, V, H, T*V , T*H, V*H,  T*V*H],
     ])
     #arr = np.array(
@@ -126,15 +127,15 @@ def cc_tvh(T, V, H, VH):
 
 def compute_CI(proba, T, V, H, VH, var_sigmas):
     
-    # M tel que sigmas = M sigmaDs
+    # M tel que sigmaDs = M sigmas
     M = compute_M_corrected(T, V, H, VH)
     MI = np.linalg.inv(M)
-    
+
     # Matrice of degrees of freedom of sigmaDs
     Nv = dof_of_sigmaDs(T, V, H) - 1
-    
+
     # Scale parameters of sigmaDs
-    interm = np.multiply(M, np.tile(var_sigmas, (7,1)))
+    interm = np.multiply(M, np.tile(var_sigmas, (7,1))) #.T to tile ?
     scale = np.divide(interm, Nv)
     
     # Variances of sigmaDs
@@ -153,22 +154,23 @@ def compute_CI(proba, T, V, H, VH, var_sigmas):
     # 7x7x7
     #correlation_matricies_of_sigmaDs = np.stack(cc_list)
     
-#    var_pred_matricies = np.stack((np.multiply(cct,var_sigmaDs[:,0]),
-#                                  np.multiply(ccv,var_sigmaDs[:,1]),
-#                                  np.multiply(cch,var_sigmaDs[:,2]),
-#                                  np.multiply(cctv,var_sigmaDs[:,3]),
-#                                  np.multiply(ccth,var_sigmaDs[:,4]),
-#                                  np.multiply(ccvh,var_sigmaDs[:,5]),
-#                                  np.multiply(cctvh,var_sigmaDs[:,6]))
-#                                 )
-    var_pred_matricies = np.stack((cct*np.sum(var_sigmaDs[:, 0]),
-                                  ccv*np.sum(var_sigmaDs[:, 1]),
-                                  cch*np.sum(var_sigmaDs[:, 2]),
-                                  cctv*np.sum(var_sigmaDs[:, 3]),
-                                  ccth*np.sum(var_sigmaDs[:, 4]),
-                                  ccvh*np.sum(var_sigmaDs[:, 5]),
-                                  cctvh*np.sum(var_sigmaDs[:, 6]),
-                                  ))
+    var_pred_matricies = np.stack((np.multiply(cct,np.sqrt(var_sigmaDs[:,0])*np.sqrt(var_sigmaDs[:,0]).T),
+                                  np.multiply(ccv,np.sqrt(var_sigmaDs[:,1])*np.sqrt(var_sigmaDs[:,1]).T),
+                                  np.multiply(cch,np.sqrt(var_sigmaDs[:,2])*np.sqrt(var_sigmaDs[:,2]).T),
+                                  np.multiply(cctv,np.sqrt(var_sigmaDs[:,3])*np.sqrt(var_sigmaDs[:,3]).T),
+                                  np.multiply(ccth,np.sqrt(var_sigmaDs[:,4])*np.sqrt(var_sigmaDs[:,4]).T),
+                                  np.multiply(ccvh,np.sqrt(var_sigmaDs[:,5])*np.sqrt(var_sigmaDs[:,5]).T),
+                                  np.multiply(cctvh,np.sqrt(var_sigmaDs[:,6])*np.sqrt(var_sigmaDs[:,6]).T),
+                                  )
+                                 )
+#    var_pred_matricies = np.stack((cct*np.sum(var_sigmaDs[:, 0]),
+#                                  ccv*np.sum(var_sigmaDs[:, 1]),
+#                                  cch*np.sum(var_sigmaDs[:, 2]),
+#                                  cctv*np.sum(var_sigmaDs[:, 3]),
+#                                  ccth*np.sum(var_sigmaDs[:, 4]),
+#                                  ccvh*np.sum(var_sigmaDs[:, 5]),
+#                                  cctvh*np.sum(var_sigmaDs[:, 6]),
+#                                  ))
     
     # matrices de covariance des sigmaDs
     covariance_matricies_of_sigmaDs = np.sum(var_pred_matricies, axis=2)
@@ -179,6 +181,6 @@ def compute_CI(proba, T, V, H, VH, var_sigmas):
     # variance des sigmas
     variances_of_sigmas = np.diagonal(covariance_matricies_of_sigmas)
     
-    CI = scipy.stats.norm.interval(proba, scale=variances_of_sigmas)
+    CI_inf, CI_sup = scipy.stats.norm.interval(proba, scale=variances_of_sigmas)
     
-    return interm, scale, Nv, var_sigmaDs, var_pred_matricies, covariance_matricies_of_sigmaDs, covariance_matricies_of_sigmas, variances_of_sigmas, CI
+    return M, MI, interm, scale, Nv, var_sigmaDs, var_pred_matricies, covariance_matricies_of_sigmaDs, covariance_matricies_of_sigmas, variances_of_sigmas, CI_inf, CI_sup 
