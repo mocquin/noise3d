@@ -8,9 +8,9 @@ def gauss(x, mu, sigma):
     return np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi*sigma**2)
 
 
-
 DTYPE = np.float64
 DDOF = 1
+
 
 ## classic approach
 def var_s(seq, ddof=DDOF): return np.var(n_s(seq), dtype=DTYPE,  ddof=ddof)
@@ -21,6 +21,7 @@ def var_ntv(seq, ddof=DDOF): return np.var(n_tv(seq), dtype=DTYPE,  ddof=ddof)
 def var_nth(seq, ddof=DDOF): return np.var(n_th(seq), dtype=DTYPE,  ddof=ddof)
 def var_nvh(seq, ddof=DDOF): return np.var(n_vh(seq), dtype=DTYPE,  ddof=ddof)
 def var_ntvh(seq, ddof=DDOF): return np.var(n_tvh(seq), dtype=DTYPE,  ddof=ddof)
+
 
 def get_all_3D_noise_var(seq):
     return var_nt(seq), var_nv(seq), var_nh(seq), var_ntv(seq), var_nth(seq), var_nvh(seq), var_ntvh(seq), np.var(seq, dtype=DTYPE, ddof=DDOF)
@@ -35,8 +36,10 @@ def var_dtdh(seq, ddof=DDOF): return np.var(n_dtdh(seq), dtype=DTYPE,  ddof=ddof
 def var_dvdh(seq, ddof=DDOF): return np.var(n_dvdh(seq), dtype=DTYPE,  ddof=ddof)
 def var_tot(seq, ddof=DDOF): return np.var(seq, dtype=DTYPE,  ddof=ddof)
 
+
 def get_all_3d_mean_var(seq):
     return var_dvdh(seq), var_dtdh(seq), var_dtdv(seq), var_dh(seq), var_dv(seq), var_dt(seq), var_tot(seq)
+
 
 ## Fast compute
 def get_all_3d_noise_var_fast(seq, ddof=DDOF):
@@ -61,8 +64,6 @@ def get_all_3d_noise_var_fast(seq, ddof=DDOF):
     
     return var_nt, var_nv, var_nh, var_ntv, var_nth, var_nvh, var_ntvh, tot
     
-
-
 
 M_classic = np.array([
 [ 1,  0,  0,  0,  0,  0,  0],
@@ -119,6 +120,7 @@ def _get_all_3d_variance_from_matrix(seq, M):
 def get_all_3d_classic_var_matrix(seq):
     return _get_all_3d_variance_from_matrix(seq, M_classic)
 
+
 def get_valid_counts(seq):
     # shapes
     Ts, Vs, Hs = seq.shape 
@@ -139,6 +141,7 @@ def get_all_3d_UBO_var_matrix(seq):
     M_UBO = compute_M_UBO(Tv, Vv, Hv, VHv)
     return _get_all_3d_variance_from_matrix(seq, M_UBO)
 
+
 # With corrected matrix
 def get_all_3d_corrected_var_matrix(seq):
     Tv, Vv, Hv, VHv = get_valid_counts(seq)
@@ -152,8 +155,10 @@ def var_netd(seq, axis=0, ddof=1):
     # prendre ddof=1 pour estimateur non biaisé
     return np.mean(np.var(seq, axis=axis, ddof=ddof))
 
+
 def std_netd(seq, axis=0, ddof=1):
     return np.mean(np.std(seq, axis=axis, ddof=ddof))
+
 
 def var_fpn(seq, axis=0, ddof=1):
     return np.var(np.mean(seq, axis=axis), ddof=ddof)
