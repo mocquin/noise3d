@@ -1,4 +1,12 @@
+""""""
+
 import numpy as np
+
+from .genseq import NAMES
+
+
+MEAN_NAMES = ('dvdh','dtdh','dtdv','dh','dv','dt')
+
 
 # Base operators
 def dt(seq):
@@ -90,10 +98,11 @@ def n_tvh(seq):
     return idh(idv(idt(seq)))
 
 
-def get_all_3d_noise_seq(seq):
+def get_all_3d_noise_seq(seq, names=False):
     """Extract all 7 noise sequences of the 3D input sequence, with same shape.
     Returns the 7 sequences plus input seq in a tuple."""
-    return n_t(seq), n_v(seq), n_h(seq), n_tv(seq), n_th(seq), n_vh(seq), n_tvh(seq), seq
+    seqs = n_t(seq), n_v(seq), n_h(seq), n_tv(seq), n_th(seq), n_vh(seq), n_tvh(seq), seq
+    return seqs + (NAMES, ) if names else seqs
 
 
 ## matrix approach
@@ -139,16 +148,17 @@ def n_dvdh(seq):
     return dv(dh(seq))
 
 
-def get_all_3D_mean_seq(seq):
+def get_all_3D_mean_seq(seq, names=False):
     """Returns 6 filtered sequences in the following order :
         dvdh, dtdh, dtdv, dh, dv, dt
     This operator is used in a matrix-approach to 
     compute all 7 noise sequences."""
-    return n_dvdh(seq), n_dtdh(seq), n_dtdv(seq), n_dh(seq), n_dv(seq), n_dt(seq)
+    seqs = n_dvdh(seq), n_dtdh(seq), n_dtdv(seq), n_dh(seq), n_dv(seq), n_dt(seq)
+    return seqs + (MEAN_NAMES, ) if names else seqs
 
 
 #### Basic extraction of noise sequences
-def get_all_3d_noise_seq_fast(seq3d):
+def get_all_3d_noise_seq_fast(seq3d, names=False):
     """Extract all 7 noise sequences of a 3D sequence.
     
     This basic approach consists in filtering noise in some
@@ -180,7 +190,8 @@ def get_all_3d_noise_seq_fast(seq3d):
     seq_th = seq_dv - seq_dtdv - seq_dvdh + seq_dtdvdh
     seq_vh = seq_dt - seq_dtdv - seq_dtdh + seq_dtdvdh
     seq_tvh = seq3d - (seq_t + seq_v + seq_h + seq_tv + seq_th + seq_vh)
-    return seq_t, seq_v, seq_h, seq_tv, seq_th, seq_vh, seq_tvh, seq3d
+    res = seq_t, seq_v, seq_h, seq_tv, seq_th, seq_vh, seq_tvh, seq3d
+    return res.append(NAMES) if names else res
 
 
 #def var_UBO_t(seq):
