@@ -120,7 +120,7 @@ def genseq_all_seq(T, V, H, sigmas, mus=MUS, names=False):
     arr_tvh = genseq_tvh(T, V, H, mu_tvh, sigma_tvh)
     arr_tot = np.sum([arr_t, arr_v, arr_h, arr_tv, arr_th, arr_vh, arr_tvh], axis=0)
     seqs = arr_t, arr_v, arr_h, arr_tv, arr_th, arr_vh, arr_tvh, arr_tot
-    return  seqs + (NAMES, ) if names else seqs
+    return  seqs + (NAMES+('tot'), ) if names else seqs
 
 
 def genseq_3dnoise_seq(T, V, H, sigmas, mus=MUS):
