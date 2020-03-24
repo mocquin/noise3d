@@ -157,6 +157,9 @@ M_classic = np.array([
 
 
 def compute_M_UBO(T, V, H, VH):
+    """
+    Compute mixin matrix from paper ####
+    """
     # if not mask is used, VH should be equal to V*H
     mat = np.array([
     [ 1,  0,  0,             1/V,             1/H,              0,                                  1/(VH)],
@@ -172,6 +175,9 @@ def compute_M_UBO(T, V, H, VH):
 
 
 def compute_M_corrected(T, V, H, VH):
+    """
+    Compute unbiased mixin matrix
+    """
     # if not mask is used, VH should be equal to V*H
     mat = np.array([
     [                1,                   0,                  0,                 1/V,                 1/H,                   0,  1/(VH)],
@@ -187,18 +193,41 @@ def compute_M_corrected(T, V, H, VH):
 
 # General function
 def _get_all_3d_variance_from_matrix(seq, M):
+    """
+    Generic function to compute noise variances from mean variances.
+    """
     vec_var_D = np.array(get_all_3d_mean_var(seq))
-    
     M_inv = np.linalg.inv(M)
-    
     vec_var_sigma = tuple(np.matmul(M_inv, vec_var_D))
-
     return vec_var_sigma + (sum(vec_var_sigma),)
     
 
 # With classic matrix
 def get_all_3d_classic_var_matrix(seq):
+    """
+    Compute classic noise variances using the matrix mixin approach.
+    """
     return _get_all_3d_variance_from_matrix(seq, M_classic)
+
+# With UBO
+def get_all_3d_UBO_var_matrix(seq):
+    """
+    Compute UBO noise variances using the matrix mixin approach.
+    """
+    Tv, Vv, Hv, VHv = get_valid_counts(seq)    
+    M_UBO = compute_M_UBO(Tv, Vv, Hv, VHv)
+    return _get_all_3d_variance_from_matrix(seq, M_UBO)
+
+
+# With corrected matrix
+def get_all_3d_corrected_var_matrix(seq):
+    """
+    Compute unbiased noise variances using the matrix mixin approach.
+    """
+    Tv, Vv, Hv, VHv = get_valid_counts(seq)
+    M_corrected = compute_M_corrected(Tv, Vv, Hv, VHv)
+    return _get_all_3d_variance_from_matrix(seq, M_corrected)
+
 
 
 def get_valid_counts(seq):
@@ -214,20 +243,6 @@ def get_valid_counts(seq):
     VHv = np.ma.count(seq[0]) # count the valid values on first image
     return Ts, Vs, Hs, VHv
     
-
-# With UBO
-def get_all_3d_UBO_var_matrix(seq):
-    Tv, Vv, Hv, VHv = get_valid_counts(seq)    
-    M_UBO = compute_M_UBO(Tv, Vv, Hv, VHv)
-    return _get_all_3d_variance_from_matrix(seq, M_UBO)
-
-
-# With corrected matrix
-def get_all_3d_corrected_var_matrix(seq):
-    Tv, Vv, Hv, VHv = get_valid_counts(seq)
-    M_corrected = compute_M_corrected(Tv, Vv, Hv, VHv)
-    return _get_all_3d_variance_from_matrix(seq, M_corrected)
-
 
 # NETD comparison
 def var_netd(seq, axis=0, ddof=1):
