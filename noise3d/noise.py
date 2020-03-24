@@ -5,8 +5,9 @@ from .opr import n_s, n_t, n_v, n_h, n_tv, n_th, n_vh, n_tvh
 from .opr import n_dt, n_dv, n_dh, n_dtdv, n_dtdh, n_dvdh
 from .opr import NAMES
 
-def gauss(x, mu, sigma):
-    return np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi*sigma**2)
+
+#def gauss(x, mu, sigma):
+#    return np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi*sigma**2)
 
 
 DTYPE = np.float64
@@ -176,7 +177,6 @@ def compute_M_corrected(T, V, H, VH=None):
     return mat
 
 
-# General function
 def _get_all_3d_variance_from_matrix(seq, M):
     """
     Generic function to compute noise variances from mean variances.
@@ -187,21 +187,22 @@ def _get_all_3d_variance_from_matrix(seq, M):
     return vec_var_sigma + (sum(vec_var_sigma),)
     
 
-# With classic matrix
-def get_all_3d_classic_var_matrix(seq):
+def get_all_3d_classic_var_matrix(seq, names=False):
     """
     Compute classic noise variances using the matrix mixin approach.
     """
-    return _get_all_3d_variance_from_matrix(seq, M_classic)
+    res =  _get_all_3d_variance_from_matrix(seq, M_classic)
+    return res + (NAMES + ('tot', ), ) if names else res
 
 
-def get_all_3d_corrected_var_matrix(seq):
+def get_all_3d_corrected_var_matrix(seq, names=False):
     """
     Compute unbiased noise variances using the matrix mixin approach.
     """
     Tv, Vv, Hv, VHv = get_valid_counts(seq)
     M_corrected = compute_M_corrected(Tv, Vv, Hv, VHv)
-    return _get_all_3d_variance_from_matrix(seq, M_corrected)
+    res = _get_all_3d_variance_from_matrix(seq, M_corrected)
+    return res + (NAMES + ('tot', ), ) if names else res
 
 
 def get_valid_counts(seq):
