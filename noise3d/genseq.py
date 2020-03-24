@@ -1,3 +1,8 @@
+"""
+TODO : allow order types of noise ? for now only random normal
+"""
+
+
 import numpy as np
 
 
