@@ -42,6 +42,7 @@ import numpy as np
 
 
 MUS = (0, 0, 0, 0, 0, 0, 0)
+NAMES = ('t', 'v', 'h', 'tv', 'th', 'vh', 'tvh')
 
 
 def genseq_t(T, V, H, mu, sigma):
