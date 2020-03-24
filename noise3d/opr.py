@@ -102,7 +102,7 @@ def get_all_3d_noise_seq(seq, names=False):
     """Extract all 7 noise sequences of the 3D input sequence, with same shape.
     Returns the 7 sequences plus input seq in a tuple."""
     seqs = n_t(seq), n_v(seq), n_h(seq), n_tv(seq), n_th(seq), n_vh(seq), n_tvh(seq), seq
-    return seqs + (NAMES, ) if names else seqs
+    return seqs + (NAMES+('tot', ), ) if names else seqs
 
 
 ## matrix approach
@@ -191,7 +191,7 @@ def get_all_3d_noise_seq_fast(seq3d, names=False):
     seq_vh = seq_dt - seq_dtdv - seq_dtdh + seq_dtdvdh
     seq_tvh = seq3d - (seq_t + seq_v + seq_h + seq_tv + seq_th + seq_vh)
     res = seq_t, seq_v, seq_h, seq_tv, seq_th, seq_vh, seq_tvh, seq3d
-    return res.append(NAMES) if names else res
+    return res.append(NAMES+'tot', ) if names else res
 
 
 # All these are for debugging/math verifications
