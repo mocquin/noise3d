@@ -97,7 +97,7 @@ def genseq_tvh(T, V, H, mu, sigma):
     return arr
 
 
-def genseq_all_seq(T, V, H, sigmas, mus=MUS):
+def genseq_all_seq(T, V, H, sigmas, mus=MUS, names=False):
     """Generate all 7 3D T-V-H sequences of noises, and return them as well as the total sequence :
      - t sequence
      - v sequence
@@ -119,7 +119,8 @@ def genseq_all_seq(T, V, H, sigmas, mus=MUS):
     arr_vh  = genseq_vh(T, V, H, mu_vh, sigma_vh)
     arr_tvh = genseq_tvh(T, V, H, mu_tvh, sigma_tvh)
     arr_tot = np.sum([arr_t, arr_v, arr_h, arr_tv, arr_th, arr_vh, arr_tvh], axis=0)
-    return arr_t, arr_v, arr_h, arr_tv, arr_th, arr_vh, arr_tvh, arr_tot
+    seqs = arr_t, arr_v, arr_h, arr_tv, arr_th, arr_vh, arr_tvh, arr_tot
+    return  seqs.append(names) if names else seqs
 
 
 def genseq_3dnoise_seq(T, V, H, sigmas, mus=MUS):
