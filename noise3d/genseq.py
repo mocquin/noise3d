@@ -1,5 +1,40 @@
 """
-TODO : allow order types of noise ? for now only random normal
+Generate noise sequences according to the 3D noise model.
+
+This module allows to create 3D sequences of T frames, 
+V lines and H columns, with any combination of the 7 noise types, namely : 
+ - temporal noise                     : t   (flicker)
+ - vertical noise                     : v   (fixed lining)
+ - horizontal noise                   : h   (fixed columning)
+ - temporal-horizontal noise          : tv  (temporaly varying lining)
+ - temporal-vertical noise            : th  (temporaly varying columning)
+ - vertical-horizontal noise          : vh  (fixed pattern noise)
+ - temporal-vertical-horizontal noise : tvh (3d-uncorrelated noise)
+
+Each kind of noise can be created with mean and standard 
+deviation values as, for eg :
+
+    # 0-mean, 1 standard deviation
+    flicker_seq = genseq_t(T, V, H, 0, 1)
+ 
+All of the 7 noise sequences can be created in one call, with tuples
+of standard deviation and means (sigmas and mus) : 
+
+    n_seqs = genseq_all_seq(T, V, H, sigmas, mus)
+    arr_t, arr_v, arr_h, arr_tv, arr_th, arr_vh, arr_tvh, arr_tot = n_seqs
+
+By default, mus are 0s.
+
+Finaly, you can get the 3D sequence directly with : 
+
+    noises_seq = noise3d.genseq.genseq_3dnoise_seq(T, V, H, sigmas)
+
+
+TODO/questions : 
+ - allow order types of noise ? for now only random normal
+ - should always keepdims ? allow as argument ? set as package config variable ?
+ - allow order changing dimensions ? (T, V, H by default)
+ - define all default means to 0 and all sigmas to 1 ?
 """
 
 
