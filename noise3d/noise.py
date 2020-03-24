@@ -156,28 +156,13 @@ M_classic = np.array([
 ])
 
 
-def compute_M_UBO(T, V, H, VH):
-    """
-    Compute mixin matrix from paper ####
-    """
-    # if not mask is used, VH should be equal to V*H
-    mat = np.array([
-    [ 1,  0,  0,             1/V,             1/H,              0,                                  1/(VH)],
-    [ 0,  1,  0,             1/T,               0,             1/H,                                 1/(T*H)],
-    [ 0,  0,  1,               0,             1/T,             1/V,                                 1/(T*V)],
-    [ 1,  1,  0, (V+T+T*V)/(T*V),             1/H,             1/H,                   (T + V + T*V)/(T*VH)],
-    [ 1,  0,  1,             1/V, (H+T+T*H)/(T*H),             1/V,                       (H+T+H*T)/(T*VH)],
-    [ 0,  1,  1,             1/T,             1/T, (H+V+H*V)/(VH),                       (H+V+H*V)/(T*VH)],
-    [ 1,  1,  1, (V+T+T*V)/(T*V), (H+T+T*H)/(T*H), (H+V+H*V)/(VH), (H+T+V+ T*V + H*T + VH + T*VH)/(T*VH)]
-    ])
 
-    return mat
-
-
-def compute_M_corrected(T, V, H, VH):
+def compute_M_corrected(T, V, H, VH=None):
     """
     Compute unbiased mixin matrix
     """
+    if VH is None:
+        VH = V*H
     # if not mask is used, VH should be equal to V*H
     mat = np.array([
     [                1,                   0,                  0,                 1/V,                 1/H,                   0,  1/(VH)],
@@ -209,17 +194,7 @@ def get_all_3d_classic_var_matrix(seq):
     """
     return _get_all_3d_variance_from_matrix(seq, M_classic)
 
-# With UBO
-def get_all_3d_UBO_var_matrix(seq):
-    """
-    Compute UBO noise variances using the matrix mixin approach.
-    """
-    Tv, Vv, Hv, VHv = get_valid_counts(seq)    
-    M_UBO = compute_M_UBO(Tv, Vv, Hv, VHv)
-    return _get_all_3d_variance_from_matrix(seq, M_UBO)
 
-
-# With corrected matrix
 def get_all_3d_corrected_var_matrix(seq):
     """
     Compute unbiased noise variances using the matrix mixin approach.
@@ -227,7 +202,6 @@ def get_all_3d_corrected_var_matrix(seq):
     Tv, Vv, Hv, VHv = get_valid_counts(seq)
     M_corrected = compute_M_corrected(Tv, Vv, Hv, VHv)
     return _get_all_3d_variance_from_matrix(seq, M_corrected)
-
 
 
 def get_valid_counts(seq):
@@ -244,26 +218,52 @@ def get_valid_counts(seq):
     return Ts, Vs, Hs, VHv
     
 
-# NETD comparison
+# Classical noise estimators
 def var_netd(seq, axis=0, ddof=1):
-    """2D Spatial mean of 1D temporel variance"""
-    # prendre ddof=1 pour estimateur non biaisé
+    """
+    Compute the NETD variance the "usual" way.
+    """
     return np.mean(np.var(seq, axis=axis, ddof=ddof))
 
 
 def std_netd(seq, axis=0, ddof=1):
+    """
+    Compute the NETD std the 'usual' way.
+    """
     return np.mean(np.std(seq, axis=axis, ddof=ddof))
 
 
 def var_fpn(seq, axis=0, ddof=1):
+    """
+    Compute the fpn variance the 'usual' way."""
     return np.var(np.mean(seq, axis=axis), ddof=ddof)
 
 
-def compare_netd_tvh(seq, v=True):
-    """Compares the classic NETD and the tvh noise."""
-    netd = var_netd(seq)
-    tvh = var_ntvh(seq) 
-    if v:
-        print("Classic NETD : {}".format(netd))
-        print("TVH noise : {}".format(tvh))
-    return netd, tvh
+# For debugging/testing
+#def get_all_3d_UBO_var_matrix(seq):
+#    """
+#    Compute UBO noise variances using the matrix mixin approach.
+#    """
+#    Tv, Vv, Hv, VHv = get_valid_counts(seq)    
+#    M_UBO = compute_M_UBO(Tv, Vv, Hv, VHv)
+#    return _get_all_3d_variance_from_matrix(seq, M_UBO)
+#
+#
+#def compute_M_UBO(T, V, H, VH=None):
+#    """
+#    Compute mixin matrix from paper ####
+#    """
+#    if VH is None:
+#        VH = V*H
+#    # if not mask is used, VH should be equal to V*H
+#    mat = np.array([
+#    [ 1,  0,  0,             1/V,             1/H,              0,                                  1/(VH)],
+#    [ 0,  1,  0,             1/T,               0,             1/H,                                 1/(T*H)],
+#    [ 0,  0,  1,               0,             1/T,             1/V,                                 1/(T*V)],
+#    [ 1,  1,  0, (V+T+T*V)/(T*V),             1/H,             1/H,                   (T + V + T*V)/(T*VH)],
+#    [ 1,  0,  1,             1/V, (H+T+T*H)/(T*H),             1/V,                       (H+T+H*T)/(T*VH)],
+#    [ 0,  1,  1,             1/T,             1/T, (H+V+H*V)/(VH),                       (H+V+H*V)/(T*VH)],
+#    [ 1,  1,  1, (V+T+T*V)/(T*V), (H+T+T*H)/(T*H), (H+V+H*V)/(VH), (H+T+V+ T*V + H*T + VH + T*VH)/(T*VH)]
+#    ])
+#
+#    return mat
