@@ -1,4 +1,3 @@
-# check for dims and shapes
 import numpy as np
 import unittest
 
@@ -38,7 +37,7 @@ class TestGenseq(unittest.TestCase):
         for seq in seqs:
             cls.assertEqual(seq.shape, (cls.T, cls.V, cls.H))
 
-            
+        # checking the position of the total noise sequence
         cls.assertTrue(np.all(seqs[-1] == sum(seqs[:-1])))
         
 
