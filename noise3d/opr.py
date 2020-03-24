@@ -194,6 +194,7 @@ def get_all_3d_noise_seq_fast(seq3d, names=False):
     return res.append(NAMES) if names else res
 
 
+# All these are for debugging/math verifications
 #def var_UBO_t(seq):
 #    T, V, H = seq.shape
 #    return 1/(T-1)* np.sum(dv(dh(idt(seq)))**2)
