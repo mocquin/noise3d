@@ -4,7 +4,7 @@ import numpy as np
 
 from .genseq import NAMES
 
-
+DTYPE = np.float64
 MEAN_NAMES = ('dvdh','dtdh','dtdv','dh','dv','dt')
 
 
@@ -13,21 +13,21 @@ def dt(seq):
     """Means the 3D input sequence along the T axis.
     Remember the convention of this package : T on 0 axis, V on 1 axis, H on 2 axis.
     Returns a sequence with same dimension as input."""
-    return np.mean(seq, axis=0, dtype=np.float64, keepdims=True)
+    return np.mean(seq, axis=0, dtype=DTYPE, keepdims=True)
 
 
 def dv(seq):
     """Means the 3D input sequence along the V axis.
     Remember the convention of this package : T on 0 axis, V on 1 axis, H on 2 axis.
     Returns a sequence with same dimension as input."""
-    return np.mean(seq, axis=1, dtype=np.float64, keepdims=True)
+    return np.mean(seq, axis=1, dtype=DTYPE, keepdims=True)
 
 
 def dh(seq):
     """Means the 3D input sequence along the H axis.
     Remember the convention of this package : T on 0 axis, V on 1 axis, H on 2 axis.
     Returns a sequence with same dimension as input."""
-    return np.mean(seq, axis=2, dtype=np.float64, keepdims=True)
+    return np.mean(seq, axis=2, dtype=DTYPE, keepdims=True)
 
 
 def idt(seq):
