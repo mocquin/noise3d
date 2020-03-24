@@ -3,6 +3,7 @@ import numpy as np
 from .opr import dt, dv, dh, idt, idv, idh
 from .opr import n_s, n_t, n_v, n_h, n_tv, n_th, n_vh, n_tvh
 from .opr import n_dt, n_dv, n_dh, n_dtdv, n_dtdh, n_dvdh
+from .opr import NAMES
 
 def gauss(x, mu, sigma):
     return np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi*sigma**2)
@@ -13,36 +14,113 @@ DDOF = 1
 
 
 ## classic approach
-def var_s(seq, ddof=DDOF): return np.var(n_s(seq), dtype=DTYPE,  ddof=ddof)
-def var_nt(seq, ddof=DDOF): return np.var(n_t(seq), dtype=DTYPE,  ddof=ddof)
-def var_nv(seq, ddof=DDOF): return np.var(n_v(seq), dtype=DTYPE,  ddof=ddof)
-def var_nh(seq, ddof=DDOF): return np.var(n_h(seq), dtype=DTYPE,  ddof=ddof)
-def var_ntv(seq, ddof=DDOF): return np.var(n_tv(seq), dtype=DTYPE,  ddof=ddof)
-def var_nth(seq, ddof=DDOF): return np.var(n_th(seq), dtype=DTYPE,  ddof=ddof)
-def var_nvh(seq, ddof=DDOF): return np.var(n_vh(seq), dtype=DTYPE,  ddof=ddof)
-def var_ntvh(seq, ddof=DDOF): return np.var(n_tvh(seq), dtype=DTYPE,  ddof=ddof)
+def var_s(seq, ddof=DDOF):
+    """Return the variance of the mean sequence."""
+    return np.var(n_s(seq), dtype=DTYPE,  ddof=ddof)
 
 
-def get_all_3D_noise_var(seq):
-    return var_nt(seq), var_nv(seq), var_nh(seq), var_ntv(seq), var_nth(seq), var_nvh(seq), var_ntvh(seq), np.var(seq, dtype=DTYPE, ddof=DDOF)
+def var_nt(seq, ddof=DDOF):
+    """Return the t noise sequence variance."""
+    return np.var(n_t(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_nv(seq, ddof=DDOF):
+    """Return the v noise sequence variance."""
+    return np.var(n_v(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_nh(seq, ddof=DDOF):
+    """Return the h noise sequence variance."""
+    return np.var(n_h(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_ntv(seq, ddof=DDOF):
+    """Return the tv noise sequence variance."""
+    return np.var(n_tv(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_nth(seq, ddof=DDOF):
+    """Return the th noise sequence variance."""
+    return np.var(n_th(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_nvh(seq, ddof=DDOF):
+    """Return the vh noise sequence variance."""
+    return np.var(n_vh(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_ntvh(seq, ddof=DDOF):
+    """Return the tvh noise sequence variance."""
+    return np.var(n_tvh(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def get_all_3D_noise_var(seq, names=False):
+    """Return all the 7 noise variance and total variance.
+    
+    Equivalent to extract all 7 noise sequences and take their variances.
+    """
+    res = var_nt(seq), var_nv(seq), var_nh(seq), var_ntv(seq), var_nth(seq), var_nvh(seq), var_ntvh(seq), np.var(seq, dtype=DTYPE, ddof=DDOF)
+    return res + (NAMES+('tot', ), ) if names else res
 
 
 ## matrix approach
-def var_dt(seq, ddof=DDOF): return np.var(n_dt(seq), dtype=DTYPE,  ddof=ddof)
-def var_dv(seq, ddof=DDOF): return np.var(n_dv(seq), dtype=DTYPE,  ddof=ddof)
-def var_dh(seq, ddof=DDOF): return np.var(n_dh(seq), dtype=DTYPE,  ddof=ddof)
-def var_dtdv(seq, ddof=DDOF): return np.var(n_dtdv(seq), dtype=DTYPE,  ddof=ddof)
-def var_dtdh(seq, ddof=DDOF): return np.var(n_dtdh(seq), dtype=DTYPE,  ddof=ddof)
-def var_dvdh(seq, ddof=DDOF): return np.var(n_dvdh(seq), dtype=DTYPE,  ddof=ddof)
-def var_tot(seq, ddof=DDOF): return np.var(seq, dtype=DTYPE,  ddof=ddof)
+def var_dt(seq, ddof=DDOF):
+    """Return dt noise variance.
+    
+    Used for the matrix approach."""
+    return np.var(n_dt(seq), dtype=DTYPE,  ddof=ddof)
 
 
-def get_all_3d_mean_var(seq):
-    return var_dvdh(seq), var_dtdh(seq), var_dtdv(seq), var_dh(seq), var_dv(seq), var_dt(seq), var_tot(seq)
+def var_dv(seq, ddof=DDOF):
+    """Return dv noise variance.
+    
+    Used for the matrix approach."""
+    return np.var(n_dv(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_dh(seq, ddof=DDOF):
+    """Return dh noise variance.
+    
+    Used for the matrix approach."""
+    return np.var(n_dh(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_dtdv(seq, ddof=DDOF):
+    """Return dtdv noise variance.
+    
+    Used for the matrix approach."""
+    return np.var(n_dtdv(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_dtdh(seq, ddof=DDOF):
+    """Return dtdh noise variance.
+    
+    Used for the matrix approach."""
+    return np.var(n_dtdh(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_dvdh(seq, ddof=DDOF):
+    """Return dvdh noise variance.
+    
+    Used for the matrix approach."""
+    return np.var(n_dvdh(seq), dtype=DTYPE,  ddof=ddof)
+
+
+def var_tot(seq, ddof=DDOF):
+    """Return the sequence variance"""
+    return np.var(seq, dtype=DTYPE,  ddof=ddof)
+
+
+def get_all_3d_mean_var(seq, names=False):
+    """Return all 7 mean noise variance of the matrix approach.
+    
+    The 6 mean and the total variance."""
+    res = var_dvdh(seq), var_dtdh(seq), var_dtdv(seq), var_dh(seq), var_dv(seq), var_dt(seq), var_tot(seq)
+    return res + (MEAN_NAMES + ('tot', ), ) if names else res
 
 
 ## Fast compute
-def get_all_3d_noise_var_fast(seq, ddof=DDOF):
+def get_all_3d_noise_var_fast(seq, ddof=DDOF, names=False):
     # 7 images de base
     seq_dt = dt(seq)
     seq_dv = dv(seq)
@@ -61,10 +139,12 @@ def get_all_3d_noise_var_fast(seq, ddof=DDOF):
     
     tot = np.var(seq, dtype=DTYPE, ddof=ddof)
     var_ntvh = tot - (var_nt + var_nv + var_nh + var_ntv + var_nth + var_nvh)
-    
-    return var_nt, var_nv, var_nh, var_ntv, var_nth, var_nvh, var_ntvh, tot
+    res = var_nt, var_nv, var_nh, var_ntv, var_nth, var_nvh, var_ntvh, tot
+    return res + (NAMES + ("tot", ), ) if names else res
     
 
+# MATRIX APPROACH
+# classic mixin matrix
 M_classic = np.array([
 [ 1,  0,  0,  0,  0,  0,  0],
 [ 0,  1,  0,  0,  0,  0,  0],
