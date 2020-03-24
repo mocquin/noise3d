@@ -54,7 +54,7 @@ def var_ntvh(seq, ddof=DDOF):
     return np.var(n_tvh(seq), dtype=DTYPE,  ddof=ddof)
 
 
-def get_all_3D_noise_var(seq, names=False):
+def get_all_3d_noise_var(seq, names=False):
     """Return all the 7 noise variance and total variance.
     
     Equivalent to extract all 7 noise sequences and take their variances.
