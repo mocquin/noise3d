@@ -105,6 +105,52 @@ def get_all_3d_noise_seq_classic(seq, names=False):
     return seqs + (NAMES+('tot', ), ) if names else seqs
 
 
+#### Basic extraction of noise sequences
+def get_all_3d_noise_seq_fast(seq, names=False):
+    """Extract all 7 noise sequences of a 3D sequence.
+    
+    Faster version of get_all_3d_noise_seq(seq).
+    
+    This basic approach consists in filtering noise in some
+    directions and extracting it from the base sequence.
+    
+    Returns all noise sequences in a tuple, as well as the 
+    original sequence, in the following order : 
+        (t, v, h, tv, th, vh, tvh, input)
+        
+    This function is called "fast" beacause it limits the 
+    number of dt, dv, dh operators calls.
+    In most cases, it should lead to quite accurate results.
+    """
+    # 7 base mean sequences
+    seq_dt = dt(seq)
+    seq_dv = dv(seq)
+    seq_dh = dh(seq)
+    seq_dtdv = dv(seq_dt)
+    seq_dtdh = dh(seq_dt)
+    seq_dvdh = dv(seq_dh)
+    # overall mean
+    seq_dtdvdh = dh(seq_dtdv)
+    # 7 noise sequences
+    seq_s = seq_dtdvdh
+    seq_t = seq_dvdh - seq_dtdvdh
+    seq_v = seq_dtdh - seq_dtdvdh
+    seq_h = seq_dtdv - seq_dtdvdh
+    seq_tv = seq_dh - seq_dtdh - seq_dvdh + seq_dtdvdh 
+    seq_th = seq_dv - seq_dtdv - seq_dvdh + seq_dtdvdh
+    seq_vh = seq_dt - seq_dtdv - seq_dtdh + seq_dtdvdh
+    seq_tvh = seq - (seq_t + seq_v + seq_h + seq_tv + seq_th + seq_vh)
+    seqs = seq_t, seq_v, seq_h, seq_tv, seq_th, seq_vh, seq_tvh, seq
+    return seqs + (NAMES+('tot', ), ) if names else seqs
+
+
+def get_noise_seqs(seq, method='fast', names=False):
+    if method == "fast":
+        return get_all_3d_noise_seq_fast(seq, names=names)
+    elif method =="classic":
+        return get_all_3d_noise_seq_classic(seq, names=names)
+
+
 ## matrix approach
 def n_dt(seq):
     """Applies a temporal mean to the 3D input sequence.
@@ -156,52 +202,7 @@ def get_all_3D_mean_seq(seq, names=False):
     seqs = n_dvdh(seq), n_dtdh(seq), n_dtdv(seq), n_dh(seq), n_dv(seq), n_dt(seq)
     return seqs + (MEAN_NAMES, ) if names else seqs
 
-
-#### Basic extraction of noise sequences
-def get_all_3d_noise_seq_fast(seq, names=False):
-    """Extract all 7 noise sequences of a 3D sequence.
     
-    Faster version of get_all_3d_noise_seq(seq).
-    
-    This basic approach consists in filtering noise in some
-    directions and extracting it from the base sequence.
-    
-    Returns all noise sequences in a tuple, as well as the 
-    original sequence, in the following order : 
-        (t, v, h, tv, th, vh, tvh, input)
-        
-    This function is called "fast" beacause it limits the 
-    number of dt, dv, dh operators calls.
-    In most cases, it should lead to quite accurate results.
-    """
-    # 7 base mean sequences
-    seq_dt = dt(seq)
-    seq_dv = dv(seq)
-    seq_dh = dh(seq)
-    seq_dtdv = dv(seq_dt)
-    seq_dtdh = dh(seq_dt)
-    seq_dvdh = dv(seq_dh)
-    # overall mean
-    seq_dtdvdh = dh(seq_dtdv)
-    # 7 noise sequences
-    seq_s = seq_dtdvdh
-    seq_t = seq_dvdh - seq_dtdvdh
-    seq_v = seq_dtdh - seq_dtdvdh
-    seq_h = seq_dtdv - seq_dtdvdh
-    seq_tv = seq_dh - seq_dtdh - seq_dvdh + seq_dtdvdh 
-    seq_th = seq_dv - seq_dtdv - seq_dvdh + seq_dtdvdh
-    seq_vh = seq_dt - seq_dtdv - seq_dtdh + seq_dtdvdh
-    seq_tvh = seq - (seq_t + seq_v + seq_h + seq_tv + seq_th + seq_vh)
-    seqs = seq_t, seq_v, seq_h, seq_tv, seq_th, seq_vh, seq_tvh, seq
-    return seqs + (NAMES+('tot', ), ) if names else seqs
-
-
-def get_noise_seqs(seq, method='fast', names=False):
-    if method == "fast":
-        return get_all_3d_noise_seq_fast(seq, names=names)
-    elif method =="classic":
-        return get_all_3d_noise_seq_classic(seq, names=names)
-
 # All these are for debugging/math verifications
 #def var_UBO_t(seq):
 #    T, V, H = seq.shape
