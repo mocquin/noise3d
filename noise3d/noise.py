@@ -51,7 +51,7 @@ def var_ntvh(seq, ddof=DDOF):
     return np.var(n_tvh(seq), dtype=DTYPE,  ddof=ddof)
 
 
-def get_all_3d_noise_var(seq, names=False):
+def get_all_3d_noise_var_classic(seq, names=False):
     """Return all the 7 noise variance and total variance.
     
     Equivalent to extract all 7 noise sequences and take their variances.
@@ -200,6 +200,18 @@ def get_all_3d_corrected_var_matrix(seq, names=False):
     res = _get_all_3d_variance_from_matrix(seq, M_corrected)
     return res + (NAMES + ('tot', ), ) if names else res
 
+
+def get_noise_vars(seq, method="fast", ddof=DDOF, names=False):
+    if method == "fast":
+        return get_all_3d_noise_var_fast(seq, ddof=DDOF, names=names)
+    elif method == "classic":
+        return get_all_3d_noise_var_classic(seq, ddof=DDOF, names=names)
+    elif method == "matrix_classic":
+        return get_all_3d_classic_var_matrix(seq, names=names)
+    elif method == "matrix_corrected":
+        return get_all_3d_corrected_var_matrix(seq, names=names)
+    else:
+        raise NotImplementedError("Method must be among classic, fast, matrix_classic and matrix_corrected")
 
 def get_valid_counts(seq):
     # shapes
