@@ -33,13 +33,16 @@ def basic_stats(data, ddof=1):
     return results
 
 
-def compute_CI(data, mu_X=None, sigma_X=None, law_X="normal", alpha=0.05, print_CI=False):
+def compute_CI(data, mu_X=None, sigma_X=None, law_X="normal", alpha=0.05, print_CI=False, ddof=1):
     """
     Compute Confidence Interval.
     """
+    if not law_X=="normal":
+        raise NotImplementedError("data must be gaussian.")
+    
     d_count = data.size
     n = d_count
-
+    d_mean = np.mean(data)
     # Mean
     ## If X follows normal lax
     if law_X=="normal":
@@ -62,8 +65,8 @@ def compute_CI(data, mu_X=None, sigma_X=None, law_X="normal", alpha=0.05, print_
 
             # Translate the bounds in terms of X such that mu is in Xbar +-sigma_Xbar, 
             # with probability proba_Xbar%
-            ci_Xbar_p = zscore_CI_p * sigma_xbar
-            ci_Xbar_m = zscore_CI_m * sigma_xbar
+            ci_Xbar_p = zscore_CI_p * sigma_Xbar
+            ci_Xbar_m = zscore_CI_m * sigma_Xbar
 
             # In the end, we know mu should be in XBar+-ci at proba_Xbar%
             if print_CI:
