@@ -137,6 +137,5 @@ class BiasedEstimatorTVH(object):
                 # no error function to plot on total variance
                 ax.plot(self.ech_t, err_func(self.ech_t, self.V, self.H, self.sigma_tvh**2), "o", label=error_label)
             ax.legend()
-            
-        
+
         plt.tight_layout()
