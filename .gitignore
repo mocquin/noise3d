@@ -4,3 +4,4 @@
 *-checkpoint.md
 HOWTO-*
 working*.ipynb
+.ipynb_checkpoints/
