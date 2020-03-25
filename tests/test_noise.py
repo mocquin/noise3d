@@ -27,7 +27,7 @@ class TestGenseq(unittest.TestCase):
                   var_tv, var_th, var_vh,
                   var_tvh)
         
-        var_set = noise3d.noise.get_all_3d_noise_var(cls.seq, names=True)
+        var_set = noise3d.noise.get_all_3d_noise_var_classic(cls.seq, names=True)
         names = var_set[-1]
         var_set = var_set[:-1]
         expected_names = ('t', 'v', 'h', 
@@ -40,7 +40,7 @@ class TestGenseq(unittest.TestCase):
         
     def test_20_fast_equivalent(cls):
         fast_vars = noise3d.noise.get_all_3d_noise_var_fast(cls.seq, names=True)
-        classic_vars = noise3d.noise.get_all_3d_noise_var(cls.seq, names=True)
+        classic_vars = noise3d.noise.get_all_3d_noise_var_classic(cls.seq, names=True)
         
         for fast, classic in zip(fast_vars, classic_vars):
             cls.assertAlmostEqual(fast, classic, places=4)
@@ -48,7 +48,7 @@ class TestGenseq(unittest.TestCase):
             # cls.assertAlmostEqual(fast, classic)
             
     def test_30_classic_matrix(cls):
-        classic_approach = noise3d.noise.get_all_3d_noise_var(cls.seq, names=True)
+        classic_approach = noise3d.noise.get_all_3d_noise_var_classic(cls.seq, names=True)
         matrix_approach = noise3d.noise.get_all_3d_classic_var_matrix(cls.seq, names=True)
         
         for classic, matrix in zip(classic_approach, matrix_approach):
