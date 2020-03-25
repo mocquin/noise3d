@@ -1,13 +1,14 @@
 import numpy as np
 
-from .opr import dt, dv, dh, idt, idv, idh
+from .opr import dt, dv, dh, idt, idv, idh, NAMES
 from .opr import n_s, n_t, n_v, n_h, n_tv, n_th, n_vh, n_tvh
 from .opr import n_dt, n_dv, n_dh, n_dtdv, n_dtdh, n_dvdh
 
-print("warning : using spectrum to compute variance is equivalent to real-space computation only if there is no defect pixels.")
 
-
-def compute_spectrum_correction_matrix(T, V, H):
+def _compute_spectrum_correction_matrix(T, V, H):
+    """
+    Compute spectrum mixin correction matrix
+    """
     mat = 1/(T*V*H) * np.array(
         [
             [V*H*(T-1), 0, 0, H*(T-1), V*(T-1), 0, T-1],
@@ -22,26 +23,11 @@ def compute_spectrum_correction_matrix(T, V, H):
     return mat
 
 
-
-#import sympy as sp
-#
-#T, V, H = sp.symbols("T V H")
-#
-#sp_mat = 1/(T*V*H)*sp.Matrix([
-#        [V*H*(T-1), 0, 0, H*(T-1), V*(T-1), 0, T-1],
-#        [0, T*H*(V-1), 0, H*(V-1), 0, T*(V-1), V-1],
-#        [0, 0, T*V*(H-1), 0, V*(H-1), T*(H-1), H-1],
-#        [0, 0, 0, H*(T-1)*(V-1), 0, 0, (T-1)*(V-1)],
-#        [0, 0, 0, 0, V*(T-1)*(H-1), 0, (T-1)*(H-1)],
-#        [0, 0, 0, 0, 0, T*(V-1)*(H-1), (V-1)*(H-1)],
-#        [0, 0, 0, 0, 0,             0, (T-1)*(V-1)*(H-1)],
-#    ])
-##
-#inv = sp_mat.inv()
-#print(inv)
-
-
 def compute_meas_psd(seq):
+    """
+    Compute measured psd.
+    Used for matrix approach.
+    """
     T, V, H = seq.shape
     seq = seq - np.mean(seq)
     data_fft = np.fft.fftn(seq, axes=(0,1,2))
@@ -69,32 +55,34 @@ def compute_meas_psd(seq):
     return psd_tm, psd_vm, psd_hm, psd_tvm, psd_thm, psd_vhm, psd_tvhm
 
 
-def compute_psd(seq):
+def compute_psd(seq, names=False):
+    """
+    Compute noises psd.
+    Relies on compute_meas_psd.
+    """
     T, V, H = seq.shape
-    correction_mat = compute_spectrum_correction_matrix(T, V, H)
+    correction_mat = _compute_spectrum_correction_matrix(T, V, H)
     inv_mat = np.linalg.inv(correction_mat)
-
     psd_m = np.asarray(compute_meas_psd(seq))
-
-    vec = np.einsum("ij,jklm->iklm", inv_mat, psd_m)
-    # verifs : print(psd_m[-1] == (T-1)*(V-1)*(H-1)/(T*V*H)*vec[-1])
-    return vec
+    res = tuple(np.einsum("ij,jklm->iklm", inv_mat, psd_m))
+    return res + (NAMES + ("tot",), ) if names else res
 
 
-#def compute_var_m(seq):
-#    T, V, H = seq.shape
-#    vec_psd_m = np.asarray(compute_meas_psd(seq))
-#    return np.sum(vec_psd_m, axis=(1,2,3))/(T*V*H)**2 # **2 : 1 pour la convention DFT, 1 pour passer en puissance
-
-def compute_var(seq):
+def compute_var(seq, names=False):
+    """
+    Compute noise variances using spectrums.
+    Using the matrix mixin approach.
+    Relis on compute_psd.
+    """
     T, V, H = seq.shape
     vec_psd = compute_psd(seq)
     vec_var = np.sum(vec_psd, axis=(1,2,3))/(T*V*H)**2
     t, v, h, tv, th, vh, tvh = vec_var
-    return t, v, h, tv, th, vh, tvh, np.sum(vec_var) # **2 : 1 pour la convention DFT, 1 pour passer en puissance
+    res = t, v, h, tv, th, vh, tvh, np.sum(vec_var) # **2 : 1 DFT conventon, 1 to go into power units
+    return res + (NAMES + ("tot",), ) if names else res
 
 
-def var_psd_astrid(seq, numeric_invert=False):
+def var_psd_astrid(seq, numeric_invert=False, names=False):
     """Stand-alone method to compute bias corrected variances.
     
     Gives same values as corrected matrix method.
@@ -105,7 +93,6 @@ def var_psd_astrid(seq, numeric_invert=False):
     #seq = seq - np.mean(seq)
     # Linear system matrix between sums (Es) and variances
     T, V, H = seq.shape
-
     
     # FT and norm of sequence
     psd_seq = np.fft.fftn(seq, axes=(0,1,2))
@@ -160,6 +147,5 @@ def var_psd_astrid(seq, numeric_invert=False):
         var_psd = np.matmul(inv_mat, Ev)
 
     t, v, h, tv, th, vh, tvh = var_psd
-
-    return t, v, h, tv, th, vh, tvh, np.sum(var_psd)
-
+    res = t, v, h, tv, th, vh, tvh, np.sum(var_psd)
+    return res + (NAMES + ("tot",), ) if names else res
