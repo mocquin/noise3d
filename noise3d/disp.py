@@ -16,20 +16,24 @@ TITLES = ["tot", "v", "h", "vh", "t", "tv", "th", "tvh"]
 def histo_seq(ax, seq, fit=True, stats_on=True, stats_print=False,
               print_CI=False, nbin=10,
               density=True):
-
+    """
+    Plot histrogram of seq with additional infos.
+    """
+    # Compute histogram
     vals = seq.flatten()
     ech = np.linspace(np.min(seq), np.max(seq), nbin)
     val, bins, patchs = ax.hist(vals, bins=ech, density=density)
-    
+    # Compute basic stats
     mean = np.mean(vals)
     std = np.std(vals)
     
+    # Add a gaussian fit
     if fit:
         ech_gauss = noise.gauss(ech, mean, std)
         ax.plot(ech, ech_gauss)
 
+    # Print stats in cli
     if stats_print:
-        
         results = analyse_normal_seq(seq, print_CI=print_CI)
         print("Count : {}".format(results["count"]))
         print("Min/Max : {}/{}".format(results["min"], results["max"]))
