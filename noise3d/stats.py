@@ -39,7 +39,7 @@ def compute_CI(data, mu_X=None, sigma_X=None, law_X="normal", alpha=0.05, print_
     """
     d_count = data.size
     n = d_count
-    
+
     # Mean
     ## If X follows normal lax
     if law_X=="normal":
@@ -132,9 +132,6 @@ def compute_CI(data, mu_X=None, sigma_X=None, law_X="normal", alpha=0.05, print_
         "ci_var_p":ci_var_p,
     }
     return results
-
-
-
 
 
 def analyse_normal_seq(data, mu_X=None, sigma_X=None, law_X="normal", alpha=0.05, print_CI=False, ddof=1):
