@@ -6,10 +6,6 @@ from .opr import n_dt, n_dv, n_dh, n_dtdv, n_dtdh, n_dvdh
 from .opr import NAMES
 
 
-#def gauss(x, mu, sigma):
-#    return np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi*sigma**2)
-
-
 DTYPE = np.float64
 DDOF = 1
 
