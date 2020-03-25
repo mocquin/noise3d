@@ -41,16 +41,23 @@ class BiasedEstimatorTVH(object):
     """This class's purpose is to demonstrate the biasness of 
     the standard estimators Works only on tvh sequence.
     """
-    def setup(self):
-        self.H = 100
-        self.V = 100
+    def __init__(self, V=100, H=100, nb_matrix=100, sigma_tvh=1):
+        
         self.t_min = 10
         self.t_max = 300
         self.delta_t = 5
-        self.ech_t = np.arange(self.t_min, self.t_max, self.delta_t)
-
+        self.V = V
+        self.H = H
+        
         # Nb of iteration to average to improve estimation ("MonteCarlo")
-        self.nb_matrix = 100
+        self.nb_matrix = nb_matrix
+        
+        # We choose a tvh sequence with std of 1
+        self.sigma_tvh = sigma_tvh
+    
+    def setup(self):
+        
+        self.ech_t = np.arange(self.t_min, self.t_max, self.delta_t)
         
         # Setting up stack results
         self.res_var_tot = np.zeros((self.nb_matrix, len(self.ech_t)), dtype=np.float64)
@@ -61,9 +68,6 @@ class BiasedEstimatorTVH(object):
         self.res_var_th = np.zeros((self.nb_matrix, len(self.ech_t)), dtype=np.float64)
         self.res_var_vh = np.zeros((self.nb_matrix, len(self.ech_t)), dtype=np.float64)
         self.res_var_tvh = np.zeros((self.nb_matrix, len(self.ech_t)), dtype=np.float64)
-
-        # We choose a tvh sequence with std of 1
-        self.sigma_tvh = 1
 
     def compute_results(self):
         
