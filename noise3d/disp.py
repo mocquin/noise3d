@@ -2,23 +2,32 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
+import noise3d
 from . import noise
 from . import opr
-from . import spectrum as ns
+from . import stats
+#from . import spectrum as ns
 
 import scipy.stats as st
 
-
+# ORDER is used to re-order the sequences to match TITLES (for display)
 ORDER = [-1, 1, 2, 5, 0, 3, 4, 6]
 TITLES = ["tot", "v", "h", "vh", "t", "tv", "th", "tvh"]
 
 
-def histo_seq(ax, seq, fit=True, stats_on=True, stats_print=False,
+def gauss(x, mu, sigma):
+    """Helper gaussian function"""
+    return np.exp(-(x-mu)**2/(2*sigma**2))/np.sqrt(2*np.pi*sigma**2)
+
+
+def histo_seq(seq, ax=None, fit=True, stats_on=True, stats_print=False,
               print_CI=False, nbin=10,
               density=True):
     """
     Plot histrogram of seq with additional infos.
     """
+    if ax is None:
+        fig, ax = plt.subplots(1, 1)
     # Compute histogram
     vals = seq.flatten()
     ech = np.linspace(np.min(seq), np.max(seq), nbin)
