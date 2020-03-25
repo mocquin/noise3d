@@ -38,12 +38,15 @@ def histo_seq(seq, ax=None, fit=True, stats_on=True, stats_print=False,
     
     # Add a gaussian fit
     if fit:
-        ech_gauss = noise.gauss(ech, mean, std)
+        ech_gauss = gauss(ech, mean, std)
         ax.plot(ech, ech_gauss)
 
-    # Print stats in cli
+    # If stats are needed
+    if stats_print or stats_on:
+        results = stats.basic_stats(seq)
+        
+    # Print stats in standard output
     if stats_print:
-        results = analyse_normal_seq(seq, print_CI=print_CI)
         print("Count : {}".format(results["count"]))
         print("Min/Max : {}/{}".format(results["min"], results["max"]))
         print("Mean : {}".format(results["mean"]))
@@ -51,9 +54,14 @@ def histo_seq(seq, ax=None, fit=True, stats_on=True, stats_print=False,
         print("Var : {}".format(results["var"]))
         print("Std : {}".format(results["std"]))
 
+    # Add stat on plot
     if stats_on:
-        results = analyse_normal_seq(seq, print_CI=print_CI)
-        ax.errorbar(mean, max(val)/2, yerr=None, xerr=std, solid_capstyle='projecting', capsize=5)
+        ax.errorbar(mean,
+                    max(val)/2,
+                    yerr=None,
+                    xerr=std,
+                    solid_capstyle='projecting',
+                    capsize=5)
         text = "Count : {}\nMin/Max : {:.3f}/{:.3f}\nMean : {:.3f}\nMedian : {:.3f}\nVar : {:.3f}\nStd : {:.3f}".format(
             results["count"], 
             results["min"], 
@@ -63,56 +71,94 @@ def histo_seq(seq, ax=None, fit=True, stats_on=True, stats_print=False,
             results["var"],
             results["std"])
         
-        ax.annotate(text, xy=(0.99, 0.99), xycoords='axes fraction', xytext=(0.99, 0.99), textcoords='axes fraction',
-                   horizontalalignment='right', verticalalignment='top')
+        ax.annotate(text, xy=(0.99, 0.99),
+                    xycoords='axes fraction', 
+                    xytext=(0.99, 0.99), 
+                    textcoords='axes fraction',
+                    horizontalalignment='right',
+                    verticalalignment='top')
+
     return ax
 
 
-def display_7seq(seqs, fit=True, stats_on=True,
-                 stats_print=False, print_CI=False,
-                 nbin=10, density=True, figsize=(8.0, 6.0)):
-    """
-    Loop over 7 axes and plot the noise histogram.
-    """
-    # create plots
-    fig, axes = plt.subplots(2, 4, figsize=figsize)
-    axes = axes.flatten()
-    # Separate the first ("tot") seq from the other 7 noises
-    top_left_ax = axes[0]
-    top_left_val = seqs[0]
-    # noises
-    axes = axes[1:]
-    seqs = seqs[1:]
-    # looping over noises
-    for seq, ax in zip(seqs, axes):
-        # plot histograms
-        histo_seq(ax, seq, fit=fit, stats_on=stats_on,
-                  stats_print=stats_print, print_CI=print_CI,
-                  nbin=nbin, density=density)
-    fig = plt.gcf()
-    return fig
+#def display_7seq(seqs, fit=True, stats_on=True,
+#                 stats_print=False, print_CI=False,
+#                 nbin=50, density=True, figsize=(8.0, 6.0), samex=False):
+#    """
+#    Loop over 7 axes and plot the noise histogram.
+#    """
+#    # create plots
+#    fig, axes = plt.subplots(2, 4, figsize=figsize)
+#    axes = axes.flatten()
+#    # Separate the first ("tot") seq from the other 7 noises
+#    top_left_ax = axes[0]
+#    top_left_val = seqs[0]
+#    # noises
+#    axes = axes[1:]
+#    seqs = seqs[1:]
+#    seqs = [seqs[i] for i in ORDER]
+#    # Bounds
+#    xmin = np.min(seqs)
+#    xmax = np.max(seqs)
+#
+#    # looping over noises
+#    for seq, ax, title in zip(seqs, axes, TITLES[1:]):
+#        # plot histograms
+#        histo_seq(seq, ax=ax, fit=fit, stats_on=stats_on,
+#                  stats_print=stats_print, print_CI=print_CI,
+#                  nbin=nbin, density=density)
+#        ax.set_title(title)
+#        if samex:
+#            ax.set_xlim(xmin, xmax)
+#    fig = plt.gcf()
+#    fig.tight_layout()
+#    return fig
 
+def _compute_noises(seq, method="fast"):
+    # Choose method to compute noises
+    if method == "fast":
+        return noise.get_all_3d_noise_var_fast(seq)
+    elif method == "classic":
+        return noise.get_all_3D_noise_var(seq)
+    elif method == "classic matrix":
+        return noise.get_all_3d_classic_var_matrix(seq)
+    elif method == "corrected":
+        return noise.get_all_3d_corrected_var_matrix(seq)
+    else:
+        raise ValueError("Specify method among fast, classic, classic matrix, and corrected")
 
-def display_8seq(seq3d, fit=True, stats_on=True, 
+def display_8seq(seqs, extract=False, fit=True, stats_on=True, 
                  stats_print=False, print_CI=False,
-                 nbin=10, density=True, figsize=(8.0, 6.0),
+                 nbin=50, density=True, figsize=(8.0, 6.0),
                  samex=False):
-
-    seqs_brute = opr.get_all_3d_noise_seq_fast(seq3d)
-    #seqs_brute = opr.get_all_3d_noise_seq(seq3d)
+    """Display all 8 histograms.
+    Input seqs can be :
+         - 1 raw 3d sequence, with extract=True
+         - 8 sequences in a list/tuple (t, v, h, tv, th, vh, tvh, tot)
+    """
+    # analyze sequences 
+    if extract:
+        seqs = noise3d.opr.get_all_3d_noise_seq_fast(seqs, names=True)
+        names = seqs[-1]
+        seqs = seqs[:-1]
+    # define plots
     fig, axes = plt.subplots(2, 4, figsize=figsize)
     axes = axes.flatten()
-    xmin = np.min(seqs_brute[-1])
-    xmax = np.max(seqs_brute[-1])
-
-    seqs_brute = [seqs_brute[i] for i in ORDER]
-
-    for seq, ax, title in zip(seqs_brute, axes, TITLES):
-        histo_seq(ax, seq, fit=fit, stats_on=stats_on, stats_print=stats_print,
+    # Compute histgram bounds if samex
+    if samex:
+        xmin = np.min(seqs[-1])
+        xmax = np.max(seqs[-1])
+    # reorder sequences
+    seqs = [seqs[i] for i in ORDER]
+    # for all sequences
+    for seq, ax, title in zip(seqs, axes, TITLES):
+        histo_seq(seq, ax=ax, fit=fit, stats_on=stats_on,
+                  stats_print=stats_print,
                   print_CI=print_CI, nbin=nbin, 
                   density=density)
-
+        # setting title
         ax.set_title(title)
+        # seetting x axis limits
         if samex:
             ax.set_xlim(xmin, xmax)
     fig = plt.gcf()
@@ -122,40 +168,33 @@ def display_8seq(seq3d, fit=True, stats_on=True,
 
 
 def noise_resume(seq, pc=False, method="fast"):
+    """
+    Compute all noise infos in a string
+    """
     T, V, H = seq.shape
-    if method == "fast":
-        noises = noise.get_all_3d_noise_var_fast(seq)
-    elif method == "classic":
-        noises = noise.get_all_3D_noise_var(seq)
-    elif method == "classic matrix":
-        noises = noise.get_all_3d_classic_var_matrix(seq)
-    elif method == "corrected":
-        noises = noise.get_all_3d_corrected_var_matrix(seq)
-    else:
-        raise ValueError("Specify method among fast, classic, classic matrix, and corrected")
-    
+    # compute noise
+    noises = _compute_noises(seq, method=method)
+    # express all noise in % of total variance
     if pc: 
         noises = tuple(np.array(noises)/noises[-1])
 
+    # split noises tuple
     var_t, var_v, var_h, var_tv, var_th, var_vh, var_tvh, var_tot = noises
         
     sep = "-------------------------------------------------\n"
     
+    # general infos
     high_lvl = "Mean : {:.3f} | Var : {:.3f} | Sum : {:.3f}\n".format(np.mean(seq), np.var(seq), np.sum(seq))
     shape = "T : {} | V : {} |  H : {} | Max error : {:.1%}\n".format(T, V, H, ((1-1/T-1/V-1/H)-1))
     method = "---------------- {:10} ---------------------\n".format(method)
+    # line of noise
     res_1 = '$\sigma^2_tot$ : {:6.3f} | $\sigma^2_v$ :  {:6.3f} | $\sigma^2_h$ :  {:6.3f} | $\sigma^2_vh$ :  {:6.3f}\n'.format(var_tot, var_v, var_h, var_vh)
+    # line 2 of noise
     res_2 = '$\sigma^2_t$ : {:8.3f} | $\sigma^2_tv$ : {:6.3f} | $\sigma^2_th$ : {:6.3f} | $\sigma^2_tvh$ : {:6.3f} \n'.format(var_t, var_tv, var_th, var_tvh)
+    #concatenate
     string_resume = sep + high_lvl + shape + method + res_1 + res_2 + sep
-    
     return string_resume
-    #print("-------------------------------------------------")
-    #print("Mean : {:.3f} | Var : {:.3f} | Sum : {:.3f}".format(np.mean(seq), np.var(seq), np.sum(seq)))
-    #print("T : {} | V : {} |  H : {} | Max error : {:.1%}".format(T, V, H, ((1-1/T-1/V-1/H)-1)))
-    #print("---------------- {:10} ---------------------".format(method))
-    #print('$\sigma^2_tot$ : {:6.3f} | $\sigma^2_v$ :  {:6.3f} | $\sigma^2_h$ :  {:6.3f} | $\sigma^2_vh$ :  {:6.3f}'.format(stot, sv, sh, svh))
-    #print('$\sigma^2_t$ : {:8.3f} | $\sigma^2_tv$ : {:6.3f} | $\sigma^2_th$ : {:6.3f} | $\sigma^2_tvh$ : {:6.3f} '.format(st, stv, sth, stvh))
-    #print("-------------------------------------------------")
+
 
     
 ### Display spectrum
