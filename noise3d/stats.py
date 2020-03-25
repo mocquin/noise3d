@@ -137,7 +137,9 @@ def compute_CI(data, mu_X=None, sigma_X=None, law_X="normal", alpha=0.05, print_
     return results
 
 
-def analyse_normal_seq(data, mu_X=None, sigma_X=None, law_X="normal", alpha=0.05, print_CI=False, ddof=1):
+def analyse_normal_seq(data, mu_X=None, sigma_X=None,
+                       law_X="normal", alpha=0.05,
+                       print_CI=False, ddof=1):
     """
     Compute basic stats about data.
     Return the results in a dict.
