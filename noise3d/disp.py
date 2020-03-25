@@ -196,7 +196,6 @@ def noise_resume(seq, pc=False, method="fast"):
     return string_resume
 
 
-    
 ### Display spectrum
 def disp_spectrum(seq, xt=0, xv=0, xh=0, figsize=(4,2), share_scale=True):
 
@@ -262,8 +261,6 @@ def disp_spectrum(seq, xt=0, xv=0, xh=0, figsize=(4,2), share_scale=True):
         fig.colorbar(im, ax=axes)
 
     return fig, axes
-
-
 
 
 ### Display images
