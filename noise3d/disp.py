@@ -8,131 +8,15 @@ from . import spectrum as ns
 
 import scipy.stats as st
 
+
 ORDER = [-1, 1, 2, 5, 0, 3, 4, 6]
 TITLES = ["tot", "v", "h", "vh", "t", "tv", "th", "tvh"]
 
 
-def analyse_normal_seq(data, mu_X=None, sigma_X=None, law_X="normal", alpha=0.05, print_CI=False, ddof=1):
+def histo_seq(ax, seq, fit=True, stats_on=True, stats_print=False,
+              print_CI=False, nbin=10,
+              density=True):
 
-    d_count = data.size
-    n = d_count
-    d_min = np.min(data)
-    d_max = np.max(data)
-    d_median = np.median(data)
-    d_mean = np.mean(data)
-    d_var = np.var(data, ddof=1)
-    d_std = np.std(data, ddof=1)
-    
-    
-    # Moyenne
-    ## Si X suit une loi normale
-    if law_X=="normal":
-        # Dans tous les cas, Xbar suit une loi symétrique
-        alpha_Xbar_2 = alpha/2
-
-        # Si on connait la variance de X
-        if sigma_X is not None:
-            # On calcule l'écart type de la loi de Xbar
-            sigma_Xbar = sigma_X/np.sqrt(n)
-            
-            # Y=(Xbar-mu)/sigma_xbar suit alors une loi normale centrée réduite
-            
-            # On calcul la positions des bornes pour une loi normale centrée 
-            # réduite Y telle que l'aire entre entre les bornes soit de proba_Xbar%
-
-            # On utilise la percent point function, telle que ppf(proba) renvoi la borne max 
-            zscore_CI_p = st.norm.ppf(1 - alpha_Xbar_2)
-            # Comme on a une loi normale centrée réduite, la loi est symmétrique donc
-            zscore_CI_m = - zscore_CI_p
-        
-            # On traduit les bornes en terme de X que mu soit dans Xbar +- sigma_Xbar à proba_Xbar %
-            ci_Xbar_p = zscore_CI_p * sigma_xbar
-            ci_Xbar_m = zscore_CI_m * sigma_xbar
-            
-            # Au final, on sait que mu est dans l'interval Xbar+-ci à proba_Xbar%
-            if print_CI:
-                print("\sigma_X known, using z-score to compute CI for Xmean")
-                print("\mu is within {}+/-{} at {}%".format(d_mean, ci_Xbar_p, alpha))
-            
-        # Si on ne connait pas sigma_X
-        if sigma_X is None:
-            # On doit estimer sigma_X, et alors Xbar suit une loi de student t
-            s_X = np.std(data, ddof=ddof)
-            s_Xbar = s_X/np.sqrt(n)
-
-            df_Xbar = n-1
-            tscore_CI_p = st.t.ppf(1 - alpha_Xbar_2, df=df_Xbar)
-            # Comme on a une loi de student, elle est symétrique
-            tscore_CI_m = - tscore_CI_p
-            
-            # On traduit les bornes en terme de X que mu soit dans Xbar +- sigma_Xbar à proba_Xbar %
-            ci_Xbar_p = tscore_CI_p * s_Xbar
-            ci_Xbar_m = tscore_CI_m * s_Xbar
-            if print_CI:
-                print("\sigma_{X} unknow, estimating it and using Student's t distribution for Xmean")
-                print("\mu is within {}+-{} at {}%".format(d_mean, ci_Xbar_p, alpha))
-    
-
-    
-    # Variance
-    ## Suit une loi du Ki2 à df=n-1 dof
-    if law_X=="normal":
-        # Si on connait la moyenne de X
-        if mu_X is not None:
-            # s2 suit une loi du ki2 à N degrés
-            s2 = np.mean(np.abs(data - mu_X)**2) * n/(n-ddof)
-            
-            # On calcule les bornes de la variable réduite
-            kiscore_CI_var_p = st.chi2.ppf(1 - alpha, df=n)
-            kiscore_CI_var_m = st.chi2.ppf(alpha, df=n)
-            
-            # On traduit en terme de variance
-            ci_var_p = s2 *(n-ddof) / kiscore_CI_var_m
-            ci_var_m = s2 *(n-ddof) / kiscore_CI_var_p
-            if print_CI:
-                print("\mu_X known, using chi2 score with df=n to compute CI for var")
-                print("Var_x is wihtin {}+-{}/{} at {}%".format(s2, ci_var_m, ci_var_p, alpha))
-
-            
-        # Si on ne connait pas la moyenne de X
-        if mu_X is None:
-            # s2 suit une loi du ki2 à N-1 degrés
-            s2 = np.var(data, ddof=ddof)
-            
-            # On calcule les bornes de la variable réduite
-            kiscore_CI_var_p = st.chi2.ppf(1 - alpha, df=n)
-            kiscore_CI_var_m = st.chi2.ppf(alpha, df=n)
-            
-            # On traduit en terme de variance
-            ci_var_p = s2 *(n-ddof) / kiscore_CI_var_m
-            ci_var_m = s2 *(n-ddof) / kiscore_CI_var_p
-            if print_CI:
-                print("\mu_X not known, using chi2 score with df=n-1 to compute CI for var")
-                print("Var_x is wihtin {}+-{}/{} at {}%".format(s2, ci_var_m, ci_var_p, alpha))
-        
-    results = {
-        "min":d_min,
-        "max":d_max,
-        "median":d_median,
-        "mean":d_mean,
-        "var":d_var,
-        "std":d_std,
-        "count":d_count,
-        "ci_Xbar_m":ci_Xbar_m,
-        "ci_Xbar_p":ci_Xbar_p,
-        "ci_var_m":ci_var_m,
-        "ci_var_p":ci_var_p,
-    }
-    return results
-
-    # visual 
-    ## histogram
-    ## qqplot
-    ## ppplot
-
-
-
-def histo_seq(ax, seq, fit=True, stats_on=True, stats_print=False, print_CI=False, nbin=10, density=True):
     vals = seq.flatten()
     ech = np.linspace(np.min(seq), np.max(seq), nbin)
     val, bins, patchs = ax.hist(vals, bins=ech, density=density)
@@ -171,19 +55,36 @@ def histo_seq(ax, seq, fit=True, stats_on=True, stats_print=False, print_CI=Fals
     return ax
 
 
-def display_7seq(seqs, fit=True, stats_on=True, stats_print=False, print_CI=False, nbin=10, density=True, figsize=(8.0, 6.0)):
+def display_7seq(seqs, fit=True, stats_on=True,
+                 stats_print=False, print_CI=False,
+                 nbin=10, density=True, figsize=(8.0, 6.0)):
+    """
+    Loop over 7 axes and plot the noise histogram.
+    """
+    # create plots
     fig, axes = plt.subplots(2, 4, figsize=figsize)
     axes = axes.flatten()
+    # Separate the first ("tot") seq from the other 7 noises
     top_left_ax = axes[0]
     top_left_val = seqs[0]
+    # noises
     axes = axes[1:]
     seqs = seqs[1:]
+    # looping over noises
     for seq, ax in zip(seqs, axes):
-        histo_seq(ax, seq, fit=fit, stats_on=stats_on, stats_print=stats_print, print_CI=print_CI, nbin=nbin, density=density)
+        # plot histograms
+        histo_seq(ax, seq, fit=fit, stats_on=stats_on,
+                  stats_print=stats_print, print_CI=print_CI,
+                  nbin=nbin, density=density)
     fig = plt.gcf()
     return fig
 
-def display_8seq(seq3d, fit=True, stats_on=True, stats_print=False, print_CI=False, nbin=10, density=True, figsize=(8.0, 6.0), samex=False):
+
+def display_8seq(seq3d, fit=True, stats_on=True, 
+                 stats_print=False, print_CI=False,
+                 nbin=10, density=True, figsize=(8.0, 6.0),
+                 samex=False):
+
     seqs_brute = opr.get_all_3d_noise_seq_fast(seq3d)
     #seqs_brute = opr.get_all_3d_noise_seq(seq3d)
     fig, axes = plt.subplots(2, 4, figsize=figsize)
@@ -193,9 +94,11 @@ def display_8seq(seq3d, fit=True, stats_on=True, stats_print=False, print_CI=Fal
 
     seqs_brute = [seqs_brute[i] for i in ORDER]
 
-    
     for seq, ax, title in zip(seqs_brute, axes, TITLES):
-        histo_seq(ax, seq, fit=fit, stats_on=stats_on, stats_print=stats_print, print_CI=print_CI, nbin=nbin, density=density)
+        histo_seq(ax, seq, fit=fit, stats_on=stats_on, stats_print=stats_print,
+                  print_CI=print_CI, nbin=nbin, 
+                  density=density)
+
         ax.set_title(title)
         if samex:
             ax.set_xlim(xmin, xmax)
