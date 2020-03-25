@@ -98,7 +98,7 @@ def n_tvh(seq):
     return idh(idv(idt(seq)))
 
 
-def get_all_3d_noise_seq(seq, names=False):
+def get_all_3d_noise_seq_classic(seq, names=False):
     """Extract all 7 noise sequences of the 3D input sequence, with same shape.
     Returns the 7 sequences plus input seq in a tuple."""
     seqs = n_t(seq), n_v(seq), n_h(seq), n_tv(seq), n_th(seq), n_vh(seq), n_tvh(seq), seq
@@ -195,6 +195,12 @@ def get_all_3d_noise_seq_fast(seq, names=False):
     seqs = seq_t, seq_v, seq_h, seq_tv, seq_th, seq_vh, seq_tvh, seq
     return seqs + (NAMES+('tot', ), ) if names else seqs
 
+
+def get_noise_seqs(seq, method='fast', names=False):
+    if method == "fast":
+        return get_all_3d_noise_seq_fast(seq, names=names)
+    elif method =="classic":
+        return get_all_3d_noise_seq_classic(seq, names=names)
 
 # All these are for debugging/math verifications
 #def var_UBO_t(seq):
