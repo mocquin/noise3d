@@ -40,7 +40,7 @@ class TestGenseq(unittest.TestCase):
         cls.assertEqual(opr.n_tvh(cls.seq).shape, (cls.T, cls.V, cls.H))
         
     def test_40_noise_seq_basic_extraction_function(cls):
-        seqs_basic = opr.get_all_3d_noise_seq(cls.seq)
+        seqs_basic = opr.get_all_3d_noise_seq_classic(cls.seq)
 
         for seq_basic in seqs_basic:
             # checking dims and shapes
@@ -68,7 +68,7 @@ class TestGenseq(unittest.TestCase):
         #cls.assertTrue(np.allclose(sum(seqs_basic[:-1]), seqs_basic[-1]))
         
     def test_50_equivalence_basic_fast_methods(cls):
-        seqs_basic = opr.get_all_3d_noise_seq(cls.seq)
+        seqs_basic = opr.get_all_3d_noise_seq_classic(cls.seq)
         seqs_fast = opr.get_all_3d_noise_seq_fast(cls.seq)
         for seq_basic, seq_fast in zip(seqs_basic, seqs_fast):
             # checking dims and shapes
