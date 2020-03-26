@@ -149,3 +149,145 @@ def var_psd_astrid(seq, numeric_invert=False, names=False):
     t, v, h, tv, th, vh, tvh = var_psd
     res = t, v, h, tv, th, vh, tvh, np.sum(var_psd)
     return res + (NAMES + ("tot",), ) if names else res
+
+
+
+class SpectrumDemo():
+    
+    def __init__(self, T=100, V=100, H=100, sigma=1, zero_mean=False):
+        self.T = T
+        self.V = V
+        self.H = H
+        self.sigma = sigma
+        seq = noise3d.genseq.genseq_tvh(self.T,
+                                        self.V,
+                                        self.H,
+                                        0,
+                                        self.sigma)
+        if zero_mean:
+            seq = seq - np.mean(seq)
+        self.seq = seq
+        self._compute_psds()
+    def _compute_psds(self):
+        self.computed_psds = noise3d.spectrum.compute_psd(self.seq)
+        self.psd = np.sum(self.computed_psds, axis=0)
+        
+        # Compute 3d fft
+        self.dft = np.fft.fftn(self.seq, axes=(0, 1, 2))
+        # take module2
+        self.mod2 = np.real(np.conjugate(self.dft)*self.dft)
+        
+    def DFT_property_origin_value_vs_sum(self):
+        """Compare the sum of the sequence with the square root of
+        squared module of Fourier Transform of seq: 
+            - sum(raw_seq)
+            - np.sqrt(mod2[0, 0, 0])
+        with mod2 = real(conj(dft(raw_seq))*dft(raw_seq))
+        
+        According to DFT properties, the origin value of the mod2 is the squared sum of the input signal : 
+        
+            mod2(0) = |\sum_{n}x_n e^{0}|^2 = |\sum_{n}x_n|^2
+        
+        """
+        print("Sum of raw_seq : np.sum(seq):")
+        print(np.sum(self.seq))
+        print("Square root of mod2 of seq dft :")
+        print(np.sqrt(self.mod2[0, 0, 0]))
+        
+    def DFT_property_mean_mod2_vs_sum_of_squared(self):
+        """Compare the mean of the module and the sum of the squared :
+            - np.sum(seq**2)
+            - np.mean(mod2)
+        
+        According to DFT properties, the mean of the module2 is equal to the sum of the squared input signal.
+        """
+        print("Sum of squared raw_seq : np.sum(raw_seq**2)")
+        print(np.sum(self.seq**2))
+        print("Mean of mod2 : ")
+        print(np.mean(self.mod2))
+        
+    def DFT_property_relation_to_variance(self):
+        """Compare : 
+            - Mean of mod2
+            - Sum of squared input
+            - N * variance of input
+            
+        In addition to mean(Mod2) == Sum(seq**2) in all case,
+        if the input is 0-mean, it is also equal to N * variance(seq).
+        
+        Other way to put it : if the signal is 0-mean, 
+        the variance is directly the sum of squared signal, 
+        which is always the mean of mod2.
+        """
+        if not np.mean(self.seq)==0:
+            raw_seq_0mean = self.seq - np.mean(self.seq)
+        else:
+            raw_seq_0mean = self.seq
+        
+        dft_0mean = np.fft.fftn(raw_seq_0mean, axes=(0, 1, 2))
+        mod2_0mean = np.real(np.conjugate(dft_0mean)*dft_0mean)
+        print("Remove mean value of raw_seq...")
+        print("Sum of squared raw_seq : np.sum(raw_seq**2)")
+        print(np.sum(raw_seq_0mean**2))
+        print("Mean of mod2 : ")
+        print(np.mean(mod2_0mean))
+        print("N times Variance of seq")
+        print(raw_seq_0mean.size * np.var(raw_seq_0mean))
+        
+    def DFT_property_Parseval(self):
+        """
+        The mean of the module is the sum of squared signal.
+        
+        If the signal is 0-mean, the variance can be used, as : 
+            var(seq) = 1/N sum x_n^2
+        """
+        print("Mean of mod2")
+        print(np.mean(self.mod2))
+        print("Sum of squared signal")
+        print(np.sum(self.seq**2))
+        print("N times Variance of 0-mean seq")
+        print(self.seq.size * np.var(self.seq-np.mean(self.seq)))
+        
+    def sums_of_psds(self):
+        """
+        Compare the sum of the DFT with the sum of
+        the overall psd computed.
+        
+        """
+        sum1 = np.sum(self.mod2)
+        sum2 = np.sum(self.psd)
+        print("Sum of mod2")
+        print(sum1)
+        print("Sum of psd")
+        print(sum2)
+        print(f"Error : {(sum1/sum2-1)}")
+        
+    def vars_of_pdsd(self):
+        """Compare the variances of the input seq dft mod2 and 
+        the recomputed psd. 
+        If the sums are equals, then the 
+        variance should be as well since the input seq must
+        be 0-mean."""
+        print(np.var(self.mod2))
+        print(np.var(self.psd))
+        
+    def origin_value_close_to_zero(self):
+        if not np.isclose(np.mean(self.seq), 0):
+            raise ValueError("The input seq must be 0 mean for this comparison to work. This is because the way the 7 psds are computed first remove the mean.")
+        print(self.psd[0, 0, 0])
+        print(self.mod2[0, 0,0])
+
+    def histograms(self, bins=100):
+        """Overlay the 2 histograms"""
+        import matplotlib.pyplot as plt
+        plt.hist(self.psd.flatten(), bins=bins,
+                 alpha=0.5, edgecolor="k",
+                label="recomputed psd")
+        plt.hist(self.mod2.flatten(), bins=bins,
+                 alpha=0.5, edgecolor="k",
+                 label="mod2")
+        plt.legend()
+        
+    def diff_hist(self, bins=100):
+        import matplotlib.pyplot as plt
+        plt.hist(self.psd.flatten()-self.mod2.flatten(), bins=bins)
