@@ -1,5 +1,6 @@
 import numpy as np
 
+import noise3d
 from .opr import dt, dv, dh, idt, idv, idh, NAMES
 from .opr import n_s, n_t, n_v, n_h, n_tv, n_th, n_vh, n_tvh
 from .opr import n_dt, n_dv, n_dh, n_dtdv, n_dtdh, n_dvdh
