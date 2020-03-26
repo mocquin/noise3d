@@ -328,4 +328,23 @@ class SequenceViewer(object):
         #plt.show()
 
 
+def idea_to_display_3d_seq():
+    """Starter for an interactive 3D display of a sequence"""
+    #%matplotlib qt
 
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
+    
+    N = 4
+    volume = np.random.rand(N, N, N)
+    filled = np.ones((N, N, N), dtype=np.bool)
+    
+    # repeating values 3 times for grayscale
+    colors = np.repeat(volume[:, :, :, np.newaxis], 3, axis=3)
+    
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    
+    ax.voxels(filled, facecolors=colors, edgecolors='k')
+    plt.show()
