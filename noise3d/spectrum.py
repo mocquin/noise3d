@@ -65,7 +65,7 @@ def compute_psd(seq, names=False):
     inv_mat = np.linalg.inv(correction_mat)
     psd_m = np.asarray(compute_meas_psd(seq))
     res = tuple(np.einsum("ij,jklm->iklm", inv_mat, psd_m))
-    return res + (NAMES + ("tot",), ) if names else res
+    return res + (NAMES, ) if names else res
 
 
 def compute_var(seq, names=False):
