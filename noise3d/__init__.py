@@ -1,4 +1,4 @@
-from .genseq import genseq_3dnoise_seq
+from .genseq import genseq_3dnoise_seq, NAMES
 
 from .opr import get_all_3d_noise_seq_classic
 
