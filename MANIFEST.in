@@ -1,0 +1,5 @@
+include LICENSE README.md requirements.txt
+recursive-include noise3d *.txt
+recursive-include tests *.py
+recursice-exclude .ipynb_checkpoints
+recursice-exclude *.ipynb_checkpoints
