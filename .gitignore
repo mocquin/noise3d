@@ -5,3 +5,8 @@
 HOWTO-*
 working*.ipynb
 .ipynb_checkpoints/
+papers/
+noise3d.egg*
+dist/
+build/
+_old/
