@@ -2,7 +2,6 @@
 
 See the [notebook](https://github.com/mocquin/noise3d/tree/master/tutorials) tutorials.
 
-
 # TODO : 
  - [ ] : sequences shapes : the operators of opr module return sequence of different shapes depending on the operator used, while the genseq module always return 3d T/V/H sequences --> by default all should return same sizes (3d TVH ?), and a flag could allow to switch to the other representation (where shape depends on noise type)
  - [ ] : lots of things could be done in the display module : 
@@ -15,8 +14,10 @@ See the [notebook](https://github.com/mocquin/noise3d/tree/master/tutorials) tut
  - [ ] : non normal pixel exclusion : add a simple function to identify non-normal pixels, and mask them
  - [ ] : add a module to read/load real tiff sequence
  - [ ] : should define a class container for 3d sequence ?
- - [ ] : should define a class container for noise analyser ?
- - [ ] : implement all in a nice GUI
+ - [ ] : should define a class container for noise analyser ?
+ - [ ] : implement all in a nice GUI
+ - [ ] : implement confidence intervals
+ - [ ] : add a list of hypothesis the model is based on
 
 # Credits
 Most of the calculations and concepts can be found in the following papers (sorted by publication date): 
@@ -33,4 +34,3 @@ Most of the calculations and concepts can be found in the following papers (sort
  - [11] `Finite sampling corrected 3D noise with confidence intervals, DAVID P. HAEFNER* AND STEPHEN D. BURKS, Vol. 54, No. 15 / May 20 2015 / Applied Optics, http://dx.doi.org/10.1364/AO.54.004907` 
  - [12] `Spatially Resolved 3D Noise, Infrared Imaging Systems: Design, Analysis, Modeling, and Testing XXVII, edited by Gerald C. Holst, Keith A. Krapels, Proc. of SPIE Vol. 9820, 98200K 2016 SPIE · CCC code: 0277-786X/16/18 · doi: 10.1117/12.2222905, David P. Haefner, Bradley L. Preece, Joshua M. Doe, and Stephen D. Burks, US Army RDECOM CERDEC, Night Vision & Electronic Sensors Directorate, 10221 Burbeck Road, Fort Belvoir, VA, USA`
  - [13] `David P. Haefner, "Power spectral density of 3D noise," Proc. SPIE 10178, Infrared Imaging Systems: Design, Analysis, Modeling, and Testing XXVIII, 101780D (3 May 2017); doi: 10.1117/12.2260885`
-
