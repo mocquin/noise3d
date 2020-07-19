@@ -10,104 +10,139 @@ MEAN_NAMES = ('dvdh','dtdh','dtdv','dh','dv','dt')
 
 # Base operators
 def dt(seq):
-    """Means the 3D input sequence along the T axis.
+    """
+    Means the 3D input sequence along the T axis.
     Remember the convention of this package : T on 0 axis, V on 1 axis, H on 2 axis.
-    Returns a sequence with same dimension as input."""
+    Returns a sequence with same dimension as input.
+    """
     return np.mean(seq, axis=0, dtype=DTYPE, keepdims=True)
 
 
 def dv(seq):
-    """Means the 3D input sequence along the V axis.
+    """
+    Means the 3D input sequence along the V axis.
     Remember the convention of this package : T on 0 axis, V on 1 axis, H on 2 axis.
-    Returns a sequence with same dimension as input."""
+    Returns a sequence with same dimension as input.
+    """
     return np.mean(seq, axis=1, dtype=DTYPE, keepdims=True)
 
 
 def dh(seq):
-    """Means the 3D input sequence along the H axis.
+    """
+    Means the 3D input sequence along the H axis.
     Remember the convention of this package : T on 0 axis, V on 1 axis, H on 2 axis.
-    Returns a sequence with same dimension as input."""
+    Returns a sequence with same dimension as input.
+    """
     return np.mean(seq, axis=2, dtype=DTYPE, keepdims=True)
 
 
 def idt(seq):
-    """Filters the T noise of the 3D input sequence.
-    Returns a sequence with same shape as input, thanks to numpy's broadcast."""
+    """
+    Filters the T noise of the 3D input sequence.
+    Returns a sequence with same shape as input, 
+    thanks to numpy's broadcast.
+    """
     return seq - dt(seq)
 
 
 def idv(seq):
-    """Filters the V noise of the 3D input sequence.
-    Returns a sequence with same shape as input, thanks to numpy's broadcast."""
+    """
+    Filters the V noise of the 3D input sequence.
+    Returns a sequence with same shape as input, 
+    thanks to numpy's broadcast.
+    """
     return seq - dv(seq)
 
 
 def idh(seq):
-    """Filters the H noise of the 3D input sequence.
-    Returns a sequence with same shape as input, thanks to numpy's broadcast."""
+    """
+    Filters the H noise of the 3D input sequence.
+    Returns a sequence with same shape as input, 
+    thanks to numpy's broadcast.
+    """
     return seq - dh(seq)
 
 
 # Noise sequence
 ## linear approach
 def n_s(seq):
-    """Extract the mean of the 3D input sequence, by applying all 3 base mean-operators.
-    Equivalent to np.mean(seq)."""
+    """
+    Extract the mean of the 3D input sequence,
+    by applying all 3 base mean-operators.
+    Equivalent to np.mean(seq).
+    """
     return dt(dv(dh(seq)))
 
 
 def n_t(seq):
-    """Extract the temporal t noise sequence of the 3D 
-    input sequence, with same shape."""
+    """
+    Extract the temporal t noise sequence of the 3D 
+    input sequence, with same shape.
+    """
     return dv(dh(idt(seq)))
 
 
 def n_v(seq):
-    """Extract the vertical v noise sequence of the 3D 
-    input sequence, with same shape."""
+    """
+    Extract the vertical v noise sequence of the 3D 
+    input sequence, with same shape.
+    """
     return dt(dh(idv(seq)))
 
 
 def n_h(seq):
-    """Extract the horizontal h noise sequence of the 3D 
-    input sequence, with same shape."""
+    """
+    Extract the horizontal h noise sequence of the 3D 
+    input sequence, with same shape.
+    """
     return dv(dt(idh(seq)))
 
 
 def n_tv(seq):
-    """Extract the temporel-vertical tv noise sequence of the 3D 
-    input sequence, with same shape."""
+    """
+    Extract the temporel-vertical tv noise sequence of the 3D 
+    input sequence, with same shape.
+    """
     return dh(idv(idt(seq)))
 
 
 def n_th(seq):
-    """Extract the temporal-horizontal th noise sequence of the 3D 
-    input sequence, with same shape."""
+    """
+    Extract the temporal-horizontal th noise sequence of the 3D 
+    input sequence, with same shape.
+    """
     return dv(idh(idt(seq)))
 
 
 def n_vh(seq):
-    """Extract the vertical-horizontal vh noise sequence of the 3D 
-    input sequence, with same shape."""
+    """
+    Extract the vertical-horizontal vh noise sequence of the 3D 
+    input sequence, with same shape.
+    """
     return dt(idv(idh(seq)))
 
 
 def n_tvh(seq):
-    """Extract the vertical temporel-vertical-horizontal noise 
-    sequence of the 3D input sequence, with same shape."""
+    """
+    Extract the vertical temporel-vertical-horizontal noise 
+    sequence of the 3D input sequence, with same shape.
+    """
     return idh(idv(idt(seq)))
 
 
 def get_all_3d_noise_seq_classic(seq, names=False):
-    """Extract all 7 noise sequences of the 3D input sequence, with same shape.
-    Returns the 7 sequences plus input seq in a tuple."""
+    """
+    Extract all 7 noise sequences of the 3D input sequence, with same shape.
+    Returns the 7 sequences plus input seq in a tuple.
+    """
     seqs = n_t(seq), n_v(seq), n_h(seq), n_tv(seq), n_th(seq), n_vh(seq), n_tvh(seq), seq
     return seqs + (NAMES+('tot', ), ) if names else seqs
 
 
 #### Basic extraction of noise sequences
 def get_all_3d_noise_seq_fast(seq, names=False):
-    """Extract all 7 noise sequences of a 3D sequence.
+    """
+    Extract all 7 noise sequences of a 3D sequence.
     
     Faster version of get_all_3d_noise_seq(seq).
     
@@ -145,60 +180,79 @@ def get_all_3d_noise_seq_fast(seq, names=False):
 
 
 def get_noise_seqs(seq, method='fast', names=False):
+    """
+    Wrapper function to get the 3D noise sequences
+    """
     if method == "fast":
         return get_all_3d_noise_seq_fast(seq, names=names)
     elif method =="classic":
         return get_all_3d_noise_seq_classic(seq, names=names)
+    else:
+        raise ValueError("method must be 'fast' or 'classic'")
 
 
 ## matrix approach
 def n_dt(seq):
-    """Applies a temporal mean to the 3D input sequence.
+    """
+    Applies a temporal mean to the 3D input sequence.
     This operator is used in a matrix-approach to 
-    compute all 7 noise sequences."""
+    compute all 7 noise sequences.
+    """
     return dt(seq)
 
 
 def n_dv(seq):
-    """Applies a vertical mean to the 3D input sequence.
+    """
+    Applies a vertical mean to the 3D input sequence.
     This operator is used in a matrix-approach to 
-    compute all 7 noise sequences."""
+    compute all 7 noise sequences.
+    """
     return dv(seq)
 
 
 def n_dh(seq):
-    """Applies a horizontal mean to the 3D input sequence.
+    """
+    Applies a horizontal mean to the 3D input sequence.
     This operator is used in a matrix-approach to 
-    compute all 7 noise sequences."""
+    compute all 7 noise sequences.
+    """
     return dh(seq)
 
 
 def n_dtdv(seq):
-    """Applies a temporal-vertical mean to the 3D input sequence.
+    """
+    Applies a temporal-vertical mean to the 3D input sequence.
     This operator is used in a matrix-approach to 
-    compute all 7 noise sequences."""
+    compute all 7 noise sequences.
+    """
     return dt(dv(seq))
 
 
 def n_dtdh(seq):
-    """Applies a temporal-horizontal mean to the 3D input sequence.
+    """
+    Applies a temporal-horizontal mean to the 3D input sequence.
     This operator is used in a matrix-approach to 
-    compute all 7 noise sequences."""
+    compute all 7 noise sequences.
+    """
     return dt(dh(seq))
 
 
 def n_dvdh(seq):
-    """Applies a vertical-horizontal mean to the 3D input sequence.
+    """
+    Applies a vertical-horizontal mean to the 3D input sequence.
     This operator is used in a matrix-approach to 
-    compute all 7 noise sequences."""
+    compute all 7 noise sequences.
+    """
     return dv(dh(seq))
 
 
 def get_all_3D_mean_seq(seq, names=False):
-    """Returns 6 filtered sequences in the following order :
+    """
+    Returns 6 filtered sequences in the following order :
         dvdh, dtdh, dtdv, dh, dv, dt
     This operator is used in a matrix-approach to 
-    compute all 7 noise sequences."""
+    compute all 7 noise sequences.
+    """
     seqs = n_dvdh(seq), n_dtdh(seq), n_dtdv(seq), n_dh(seq), n_dv(seq), n_dt(seq)
     return seqs + (MEAN_NAMES, ) if names else seqs
 
