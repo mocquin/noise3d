@@ -54,7 +54,12 @@ def var_ntvh(seq, ddof=DDOF):
 def get_all_3d_noise_var_classic(seq, names=False):
     """Return all the 7 noise variance and total variance.
     
-    Equivalent to extract all 7 noise sequences and take their variances.
+    Equivalent to extract all 7 noise sequences and take 
+    their variances.
+    Returns 8 noise variances (7 3D noise component and 
+    total variance) in a tuple.
+    If names==True, also returns a tuple of strings 
+    containing the variances names.
     """
     res = var_nt(seq), var_nv(seq), var_nh(seq), var_ntv(seq), var_nth(seq), var_nvh(seq), var_ntvh(seq), np.var(seq, dtype=DTYPE, ddof=DDOF)
     return res + (NAMES+('tot', ), ) if names else res
@@ -118,7 +123,7 @@ def get_all_3d_mean_var(seq, names=False):
 
 ## Fast compute
 def get_all_3d_noise_var_fast(seq, ddof=DDOF, names=False):
-    # 7 images de base
+    """Faster and equivalent way of getting the 3D noise variances."""
     seq_dt = dt(seq)
     seq_dv = dv(seq)
     seq_dh = dh(seq)
@@ -176,6 +181,9 @@ def compute_M_corrected(T, V, H, VH=None):
 def _get_all_3d_variance_from_matrix(seq, M):
     """
     Generic function to compute noise variances from mean variances.
+    This is a helper function for :
+     - get_all_3d_classic_var_matrix
+     - get_all_3d_corrected_var_matrix
     """
     vec_var_D = np.array(get_all_3d_mean_var(seq))
     M_inv = np.linalg.inv(M)
@@ -213,6 +221,7 @@ def get_noise_vars(seq, method="fast", ddof=DDOF, names=False):
     else:
         raise NotImplementedError("Method must be among classic, fast, matrix_classic and matrix_corrected")
 
+
 def get_valid_counts(seq):
     # shapes
     Ts, Vs, Hs = seq.shape 
@@ -235,16 +244,10 @@ def var_netd(seq, axis=0, ddof=1):
     return np.mean(np.var(seq, axis=axis, ddof=ddof))
 
 
-def std_netd(seq, axis=0, ddof=1):
-    """
-    Compute the NETD std the 'usual' way.
-    """
-    return np.mean(np.std(seq, axis=axis, ddof=ddof))
-
-
 def var_fpn(seq, axis=0, ddof=1):
     """
-    Compute the fpn variance the 'usual' way."""
+    Compute the fpn variance the 'usual' way.
+    """
     return np.var(np.mean(seq, axis=axis), ddof=ddof)
 
 
